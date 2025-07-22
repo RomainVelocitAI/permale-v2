@@ -1,0 +1,260 @@
+import Airtable from 'airtable';
+// Import types from the types directory
+import { Projet, TypeBijou } from '@/types';
+
+// Lazy initialization of Airtable
+let base: any;
+let projetsTable: any;
+
+// Helper function to extract URLs from Airtable attachment field
+function extractPhotosUrls(attachments: any): string[] {
+  if (!attachments || !Array.isArray(attachments)) return [];
+  
+  return attachments.map((attachment: any) => attachment.url || '').filter(Boolean);
+}
+
+function initializeAirtable() {
+  if (projetsTable) return projetsTable;
+
+  if (!process.env.AIRTABLE_API_KEY) {
+    throw new Error('AIRTABLE_API_KEY is not defined');
+  }
+
+  if (!process.env.AIRTABLE_BASE_ID) {
+    throw new Error('AIRTABLE_BASE_ID is not defined');
+  }
+
+  if (!process.env.AIRTABLE_TABLE_NAME) {
+    throw new Error('AIRTABLE_TABLE_NAME is not defined');
+  }
+
+  try {
+    base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
+      process.env.AIRTABLE_BASE_ID
+    );
+    projetsTable = base(process.env.AIRTABLE_TABLE_NAME);
+    return projetsTable;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Helper functions
+export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>): Promise<Projet> {
+  try {
+    const table = initializeAirtable();
+    // Creating project with data
+    
+    // Build fields object with only provided values
+    const fields: any = {};
+    if (projet.nom) fields['Nom'] = projet.nom;
+    if (projet.prenom) fields['Prenom'] = projet.prenom;
+    if (projet.email) fields['Email'] = projet.email;
+    if (projet.telephone) fields['Telephone'] = projet.telephone;
+    
+    // Map TypeBijou to Airtable's simplified categories
+    if (projet.typeBijou) {
+      const typeBijouMapping: Record<string, string> = {
+        'Alliance': 'Bague',
+        'Bague de Fiançailles': 'Bague',
+        'Chevalière': 'Bague',
+        'Bague autre': 'Bague',
+        'Collier': 'Collier',
+        'Pendentif': 'Collier',
+        'Boucle d\'oreille': 'Boucles d\'oreilles',
+        'Bracelet': 'Bracelet',
+        'Percing': 'Autre',
+        'Bijoux autre': 'Autre'
+      };
+      fields['Type de bijou'] = typeBijouMapping[projet.typeBijou] || 'Autre';
+    }
+    
+    if (projet.description) fields['Description'] = projet.description;
+    
+    // Map new fields to Airtable
+    if (projet.occasion) fields['Occasion'] = projet.occasion;
+    if (projet.pourQui) fields['Pour qui'] = projet.pourQui;
+    if (projet.budget) fields['Budget'] = parseFloat(projet.budget);
+    if (projet.dateLivraison) fields['Date de livraison'] = projet.dateLivraison;
+    if (projet.gravure) fields['Gravure'] = projet.gravure;
+    
+    // Handle uploaded photos - Airtable expects an array of objects with url
+    if (projet.photosModele && projet.photosModele.length > 0) {
+      fields['Images'] = projet.photosModele.map((url, index) => ({
+        url: url,
+        filename: `photo-${index + 1}.jpg`
+      }));
+    }
+    
+    fields['Date de creation'] = new Date().toISOString();
+    
+    const record = await table.create(fields);
+
+    const photosUrls = extractPhotosUrls(record.get('Images'));
+    
+    return {
+      id: record.id,
+      nom: record.get('Nom') as string || '',
+      prenom: record.get('Prenom') as string || '',
+      email: record.get('Email') as string || '',
+      telephone: record.get('Telephone') as string || '',
+      typeBijou: projet.typeBijou || 'Alliance' as TypeBijou, // Keep original value since Airtable has different categories
+      description: record.get('Description') as string || '',
+      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      photosModele: photosUrls,
+      occasion: record.get('Occasion') as string || '',
+      pourQui: record.get('Pour qui') as string || '',
+      budget: record.get('Budget') ? record.get('Budget').toString() : '',
+      dateLivraison: record.get('Date de livraison') as string || '',
+      gravure: record.get('Gravure') as string || '',
+      images: [], // Reserved for AI-generated images
+      imageSelectionnee: record.get('Image selectionnee') as string || '',
+      imageIA1: record.get('imageIA1') as string || '',
+      imageIA2: record.get('imageIA2') as string || '',
+      imageIA3: record.get('imageIA3') as string || '',
+      imageIA4: record.get('imageIA4') as string || '',
+      imageIA5: record.get('imageIA5') as string || '',
+      urlPresentation: record.get('URL Presentation') as string || '',
+      dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getAllProjets(): Promise<Projet[]> {
+  try {
+    const table = initializeAirtable();
+    const records = await table.select({
+      sort: [{ field: 'Date de creation', direction: 'desc' }],
+    }).all();
+
+    return records.map((record: any) => {
+      const photosUrls = extractPhotosUrls(record.get('Images'));
+      
+      return {
+        id: record.id,
+        nom: record.get('Nom') as string || '',
+        prenom: record.get('Prenom') as string || '',
+        email: record.get('Email') as string || '',
+        telephone: record.get('Telephone') as string || '',
+        typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+        description: record.get('Description') as string || '',
+        aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+        photosModele: photosUrls,
+        occasion: record.get('Occasion') as string || '',
+        pourQui: record.get('Pour qui') as string || '',
+        budget: record.get('Budget') ? record.get('Budget').toString() : '',
+        dateLivraison: record.get('Date de livraison') as string || '',
+        gravure: record.get('Gravure') as string || '',
+        images: [], // Reserved for AI-generated images
+        imageSelectionnee: record.get('Image selectionnee') as string || '',
+        imageIA1: record.get('imageIA1') as string || '',
+        imageIA2: record.get('imageIA2') as string || '',
+        imageIA3: record.get('imageIA3') as string || '',
+        imageIA4: record.get('imageIA4') as string || '',
+        imageIA5: record.get('imageIA5') as string || '',
+        urlPresentation: record.get('URL Presentation') as string || '',
+        dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
+      };
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getProjetById(id: string): Promise<Projet | null> {
+  try {
+    const table = initializeAirtable();
+    const record = await table.find(id);
+    
+    const photosUrls = extractPhotosUrls(record.get('Images'));
+    
+    return {
+      id: record.id,
+      nom: record.get('Nom') as string || '',
+      prenom: record.get('Prenom') as string || '',
+      email: record.get('Email') as string || '',
+      telephone: record.get('Telephone') as string || '',
+      typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+      description: record.get('Description') as string || '',
+      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      photosModele: photosUrls,
+      occasion: record.get('Occasion') as string || '',
+      pourQui: record.get('Pour qui') as string || '',
+      budget: record.get('Budget') ? record.get('Budget').toString() : '',
+      dateLivraison: record.get('Date de livraison') as string || '',
+      gravure: record.get('Gravure') as string || '',
+      images: [], // Reserved for AI-generated images
+      imageSelectionnee: record.get('Image selectionnee') as string || '',
+      imageIA1: record.get('imageIA1') as string || '',
+      imageIA2: record.get('imageIA2') as string || '',
+      imageIA3: record.get('imageIA3') as string || '',
+      imageIA4: record.get('imageIA4') as string || '',
+      imageIA5: record.get('imageIA5') as string || '',
+      urlPresentation: record.get('URL Presentation') as string || '',
+      dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function updateProjet(id: string, updates: Partial<Projet>): Promise<Projet | null> {
+  try {
+    const table = initializeAirtable();
+    const fieldsToUpdate: any = {};
+    
+    if (updates.images) fieldsToUpdate['Images'] = updates.images;
+    if (updates.imageSelectionnee) fieldsToUpdate['Image selectionnee'] = updates.imageSelectionnee;
+    if (updates.imageIA1) fieldsToUpdate['imageIA1'] = updates.imageIA1;
+    if (updates.imageIA2) fieldsToUpdate['imageIA2'] = updates.imageIA2;
+    if (updates.imageIA3) fieldsToUpdate['imageIA3'] = updates.imageIA3;
+    if (updates.imageIA4) fieldsToUpdate['imageIA4'] = updates.imageIA4;
+    if (updates.imageIA5) fieldsToUpdate['imageIA5'] = updates.imageIA5;
+    if (updates.urlPresentation) fieldsToUpdate['URL Presentation'] = updates.urlPresentation;
+    
+    // Si toutes les images IA sont présentes et qu'il n'y a pas encore d'URL de présentation
+    if ((updates.imageIA1 || updates.imageIA2 || updates.imageIA3 || updates.imageIA4 || updates.imageIA5) && !updates.urlPresentation) {
+      // Récupérer le projet actuel pour avoir le nom et prénom
+      const currentProject = await getProjetById(id);
+      if (currentProject) {
+        // Générer l'URL de présentation
+        const slug = `${currentProject.nom.toLowerCase()}-${currentProject.prenom.toLowerCase()}-${id}`;
+        fieldsToUpdate['URL Presentation'] = `https://permale.com/${slug}`;
+      }
+    }
+    
+    const record = await table.update(id, fieldsToUpdate);
+    
+    const photosUrls = extractPhotosUrls(record.get('Images'));
+    
+    return {
+      id: record.id,
+      nom: record.get('Nom') as string || '',
+      prenom: record.get('Prenom') as string || '',
+      email: record.get('Email') as string || '',
+      telephone: record.get('Telephone') as string || '',
+      typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+      description: record.get('Description') as string || '',
+      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      photosModele: photosUrls,
+      occasion: record.get('Occasion') as string || '',
+      pourQui: record.get('Pour qui') as string || '',
+      budget: record.get('Budget') ? record.get('Budget').toString() : '',
+      dateLivraison: record.get('Date de livraison') as string || '',
+      gravure: record.get('Gravure') as string || '',
+      images: [], // Reserved for AI-generated images
+      imageSelectionnee: record.get('Image selectionnee') as string || '',
+      imageIA1: record.get('imageIA1') as string || '',
+      imageIA2: record.get('imageIA2') as string || '',
+      imageIA3: record.get('imageIA3') as string || '',
+      imageIA4: record.get('imageIA4') as string || '',
+      imageIA5: record.get('imageIA5') as string || '',
+      urlPresentation: record.get('URL Presentation') as string || '',
+      dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
+    };
+  } catch (error) {
+    return null;
+  }
+}
