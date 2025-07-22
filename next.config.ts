@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -30,6 +31,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Optimizations pour Netlify
+  compress: true,
+  poweredByHeader: false,
 };
 
 export default nextConfig;
