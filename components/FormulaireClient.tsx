@@ -177,7 +177,7 @@ export default function FormulaireClient() {
       <div className="min-h-screen bg-[#efefef] py-8">
         <div className="max-w-4xl mx-auto px-4">
           {/* Progress bar */}
-          <div className="mb-12">
+          <div className="mb-12 pt-8">
             <div className="relative">
               <div className="flex justify-between items-center mb-2">
                 <div className={`flex items-center ${currentStep >= 1 ? 'text-[#363d43]' : 'text-[#363d43]/40'}`}>
@@ -300,7 +300,10 @@ export default function FormulaireClient() {
                 <div className="flex justify-center pt-12">
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => {
+                      setCurrentStep(2);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="relative overflow-hidden group px-20 py-4 border border-[#363d43] bg-[#363d43] text-[#efefef] font-light tracking-[0.2em] hover:text-[#363d43] transition-all duration-500 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
                   >
@@ -455,7 +458,10 @@ export default function FormulaireClient() {
                 <div className="flex justify-center gap-4 pt-12">
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(1)}
+                    onClick={() => {
+                      setCurrentStep(1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="group px-16 py-4 border border-[#363d43] text-[#363d43] font-light tracking-[0.2em] hover:bg-[#363d43]/5 transition-all duration-300 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
                   >
@@ -463,7 +469,10 @@ export default function FormulaireClient() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(3)}
+                    onClick={() => {
+                      setCurrentStep(3);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="relative overflow-hidden group px-16 py-4 border border-[#363d43] bg-[#363d43] text-[#efefef] font-light tracking-[0.2em] hover:text-[#363d43] transition-all duration-500 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
                   >
@@ -605,7 +614,10 @@ export default function FormulaireClient() {
                 <div className="flex justify-center gap-4 pt-12">
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => {
+                      setCurrentStep(2);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="group px-16 py-4 border border-[#363d43] text-[#363d43] font-light tracking-[0.2em] hover:bg-[#363d43]/5 transition-all duration-300 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
                   >
