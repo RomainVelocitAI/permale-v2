@@ -86,8 +86,25 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < images.length; i++) {
       try {
         const response = await fetch(images[i]);
+        
+        // Vérifier que la réponse est valide
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        console.log(`[API] Type de contenu image ${i + 1}:`, contentType);
+        
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+        
+        // Vérifier que le buffer n'est pas vide
+        if (buffer.length === 0) {
+          throw new Error('Image vide reçue');
+        }
+        
+        console.log(`[API] Taille de l'image ${i + 1}:`, buffer.length, 'bytes');
+        
         const base64 = `data:image/png;base64,${buffer.toString('base64')}`;
         base64Images.push(base64);
         
