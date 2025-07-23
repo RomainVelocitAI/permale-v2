@@ -310,7 +310,10 @@ export default function FormulaireClient() {
                     type="button"
                     onClick={() => {
                       setCurrentStep(2);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      // Utiliser setTimeout pour s'assurer que le DOM est mis à jour
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }, 0);
                     }}
                     className="relative overflow-hidden group px-20 py-4 border border-[#363d43] bg-[#363d43] text-[#efefef] font-light tracking-[0.2em] hover:text-[#363d43] transition-all duration-500 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
@@ -468,7 +471,9 @@ export default function FormulaireClient() {
                     type="button"
                     onClick={() => {
                       setCurrentStep(1);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }, 0);
                     }}
                     className="group px-16 py-4 border border-[#363d43] text-[#363d43] font-light tracking-[0.2em] hover:bg-[#363d43]/5 transition-all duration-300 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
@@ -479,7 +484,9 @@ export default function FormulaireClient() {
                     type="button"
                     onClick={() => {
                       setCurrentStep(3);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }, 0);
                     }}
                     className="relative overflow-hidden group px-16 py-4 border border-[#363d43] bg-[#363d43] text-[#efefef] font-light tracking-[0.2em] hover:text-[#363d43] transition-all duration-500 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}
@@ -624,7 +631,10 @@ export default function FormulaireClient() {
                     type="button"
                     onClick={() => {
                       setCurrentStep(2);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      // Utiliser setTimeout pour s'assurer que le DOM est mis à jour
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }, 0);
                     }}
                     className="group px-16 py-4 border border-[#363d43] text-[#363d43] font-light tracking-[0.2em] hover:bg-[#363d43]/5 transition-all duration-300 text-sm uppercase"
                     style={{ fontFamily: 'Roboto Condensed' }}

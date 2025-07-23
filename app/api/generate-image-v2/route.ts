@@ -47,32 +47,18 @@ export async function POST(request: NextRequest) {
     console.log('[API] Génération avec GPT-4.1 Nano + DALL-E 3');
     console.log(`[API] Coût estimé total: ${totalCost}€ (0.001€ prompt + ${imageCost}€ pour ${numberOfImages} images)`);
 
-    // Générer les images en deux lots pour éviter les timeouts
-    const results = [];
+    // Générer seulement 2 images pour éviter les timeouts Netlify
+    const numberOfImagesToGenerate = 2; // Réduit temporairement de 4 à 2
+    console.log(`[API] Génération de ${numberOfImagesToGenerate} images pour éviter les timeouts...`);
     
-    // Premier lot : 2 images en parallèle
-    console.log('[API] Génération du premier lot (2 images)...');
-    const firstBatch = await Promise.all(
-      Array(2).fill(null).map(() => 
+    const results = await Promise.all(
+      Array(numberOfImagesToGenerate).fill(null).map(() => 
         GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
           quality: 'standard',
           returnBase64: false
         })
       )
     );
-    results.push(...firstBatch);
-    
-    // Deuxième lot : 2 images en parallèle
-    console.log('[API] Génération du deuxième lot (2 images)...');
-    const secondBatch = await Promise.all(
-      Array(2).fill(null).map(() => 
-        GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
-          quality: 'standard',
-          returnBase64: false
-        })
-      )
-    );
-    results.push(...secondBatch);
     
     const images = results.map(result => result.imageUrl);
     console.log(`[API] ${images.length} images générées avec succès`);
