@@ -6,9 +6,13 @@ import { Projet } from '@/types';
  * Remplace la génération manuelle par une génération IA
  */
 export class GPTNanoPromptService {
-  private static openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '',
-  });
+  private static getOpenAI() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY n\'est pas défini dans les variables d\'environnement');
+    }
+    return new OpenAI({ apiKey });
+  }
 
   /**
    * Génère un prompt pour l'image de bijou en utilisant GPT-4.1 Nano
@@ -36,7 +40,8 @@ ${context}
 RAPPEL: Le prompt DOIT commencer par la phrase de triple vue adaptée au type de bijou.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
+      const openai = this.getOpenAI();
+      const response = await openai.chat.completions.create({
         model: 'gpt-4.1-nano',
         messages: [
           { role: 'system', content: systemPrompt },

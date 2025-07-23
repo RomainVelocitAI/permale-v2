@@ -110,7 +110,9 @@ export default function FormulaireClient() {
       
       // Lancer la génération d'images en arrière-plan
       if (data.id) {
-        // Appel API pour générer les images sans attendre la réponse
+        console.log('[FormulaireClient] Lancement de la génération d\'images pour projet ID:', data.id);
+        
+        // Appel API pour générer les images
         fetch('/api/generate-image-v2', {
           method: 'POST',
           headers: {
@@ -122,8 +124,28 @@ export default function FormulaireClient() {
             mode: 'test',
             generateMultiple: false
           }),
-        }).catch(error => {
-          console.error('Erreur lors de la génération d\'images en arrière-plan:', error);
+        })
+        .then(async (imageResponse) => {
+          console.log('[FormulaireClient] Réponse de generate-image-v2:', imageResponse.status);
+          
+          if (!imageResponse.ok) {
+            const errorData = await imageResponse.text();
+            console.error('[FormulaireClient] Erreur API generate-image-v2:', errorData);
+            throw new Error(`Erreur API: ${imageResponse.status}`);
+          }
+          
+          const imageData = await imageResponse.json();
+          console.log('[FormulaireClient] Images générées avec succès:', imageData);
+          
+          // Log des URLs publiques
+          if (imageData.result && imageData.result.images) {
+            imageData.result.images.forEach((img: any, index: number) => {
+              console.log(`[FormulaireClient] Image ${index + 1} URL publique:`, img.publicUrl);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('[FormulaireClient] Erreur lors de la génération d\'images:', error);
         });
       }
 

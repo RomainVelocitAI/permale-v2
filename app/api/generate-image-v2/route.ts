@@ -73,17 +73,9 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < images.length; i++) {
       try {
         const response = await fetch(images[i]);
-        const blob = await response.blob();
-        
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result as string;
-            resolve(result);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64 = `data:image/png;base64,${buffer.toString('base64')}`;
         base64Images.push(base64);
         
         // Uploader vers GitHub pour obtenir une URL publique permanente

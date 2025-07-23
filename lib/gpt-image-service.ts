@@ -1,9 +1,13 @@
 import OpenAI from 'openai';
 
-// Initialiser le client OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+// Fonction pour obtenir le client OpenAI avec validation de la clé
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY n\'est pas défini dans les variables d\'environnement');
+  }
+  return new OpenAI({ apiKey });
+}
 
 /**
  * Configuration officielle de GPT-Image 1
@@ -50,6 +54,7 @@ export async function generateWithGPTImage(
     };
 
     // Appel à l'API OpenAI avec GPT-Image 1
+    const openai = getOpenAI();
     const response = await openai.images.generate({
       model: finalConfig.model,
       prompt,
@@ -97,6 +102,7 @@ export async function generateBase64WithGPTImage(
       style: config.style || 'vivid'
     };
 
+    const openai = getOpenAI();
     const response = await openai.images.generate({
       model: finalConfig.model,
       prompt,
