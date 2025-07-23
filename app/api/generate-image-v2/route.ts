@@ -22,13 +22,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Estimer le coût (GPT-4.1 Nano + GPT-Image)
-    const gptNanoCost = 0.001; // Coût estimé pour la génération du prompt
-    const imageCost = 0.02 * 4; // Prix pour qualité 'low' x 4 images
+    // Estimer le coût (GPT-4.1 Nano + DALL-E 3)
+    const gptNanoCost = 0.001; // Coût estimé pour la génération du prompt (~300 tokens)
+    const imageCost = 0.04 * 4; // Prix pour DALL-E 3 qualité 'standard' x 4 images
     const totalCost = gptNanoCost + imageCost;
     
-    console.log('[API] Génération d\'image avec GPT-4.1 Nano + GPT-Image');
-    console.log('[API] Coût estimé total:', totalCost, '€');
+    console.log('[API] Génération avec GPT-4.1 Nano + DALL-E 3');
+    console.log('[API] Coût estimé total:', totalCost, '€ (0.001€ prompt + 0.16€ images)');
 
     // Générer 4 images avec le nouveau service
     const results = await Promise.all(
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           index: index + 1
         })),
         prompt: results[0].prompt,
-        model: 'gpt-4.1-nano + gpt-image-1',
+        model: 'gpt-4.1-nano + dall-e-3',
         generationMethod: results[0].generationMethod,
         cost: totalCost,
         count: 4

@@ -111,7 +111,7 @@ export default function FormulaireClient() {
       // Lancer la génération d'images en arrière-plan
       if (data.id) {
         // Appel API pour générer les images sans attendre la réponse
-        fetch('/api/generate-image', {
+        fetch('/api/generate-image-v2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
