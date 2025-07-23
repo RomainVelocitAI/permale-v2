@@ -87,6 +87,20 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       }));
     }
     
+    // Handle AI generated images - save to imageIA1-4 fields
+    if (projet.images && projet.images.length > 0) {
+      projet.images.forEach((url, index) => {
+        if (index < 4) { // Only save first 4 images
+          fields[`imageIA${index + 1}`] = url;
+        }
+      });
+      
+      // Set the first image as selected by default
+      if (!projet.imageSelectionnee && projet.images[0]) {
+        fields['Image selectionnee'] = projet.images[0];
+      }
+    }
+    
     fields['Date de creation'] = new Date().toISOString();
     
     // Créer d'abord l'enregistrement pour obtenir l'ID

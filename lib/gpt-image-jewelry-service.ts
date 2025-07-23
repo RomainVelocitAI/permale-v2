@@ -164,7 +164,7 @@ export class GPTImageJewelryService {
   static async generateJewelryImage(
     projet: Partial<Projet>,
     options: {
-      quality?: 'low' | 'standard' | 'high';
+      quality?: 'low' | 'medium' | 'high';
       returnBase64?: boolean;
     } = {}
   ) {
@@ -173,20 +173,22 @@ export class GPTImageJewelryService {
     console.log('Prompt GPT-Image généré:', prompt);
 
     if (options.returnBase64) {
-      const result = await generateBase64WithGPTImage(prompt, {
+      const results = await generateBase64WithGPTImage(prompt, {
         quality: options.quality || 'low'
-      });
+      }, 1);
       
+      const result = results[0];
       return {
         ...result,
         prompt,
         imageUrl: result.base64
       };
     } else {
-      const result = await generateWithGPTImage(prompt, {
-        quality: options.quality || 'low'
-      });
+      const results = await generateWithGPTImage(prompt, {
+        quality: options.quality || 'standard'
+      }, 1);
       
+      const result = results[0];
       // Convertir en base64 si nécessaire
       const base64 = await imageUrlToBase64(result.url);
       
