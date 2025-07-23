@@ -53,8 +53,14 @@ export async function generateWithGPTImage(
       style: config.style || 'vivid'
     };
 
+    console.log('[GPT-Image] Configuration:', finalConfig);
+    console.log('[GPT-Image] Prompt:', prompt.substring(0, 100) + '...');
+    console.log('[GPT-Image] Nombre d\'images:', count);
+
     // Appel à l'API OpenAI avec GPT-Image 1
     const openai = getOpenAI();
+    console.log('[GPT-Image] Appel à OpenAI DALL-E 3...');
+    
     const response = await openai.images.generate({
       model: finalConfig.model,
       prompt,
@@ -62,6 +68,8 @@ export async function generateWithGPTImage(
       size: finalConfig.size,
       quality: finalConfig.quality,
     });
+
+    console.log('[GPT-Image] Réponse reçue:', response.data.length, 'images');
 
     if (!response.data || response.data.length === 0) {
       throw new Error('GPT-Image n\'a pas retourné d\'images');
@@ -74,8 +82,11 @@ export async function generateWithGPTImage(
       quality: finalConfig.quality!,
       cost: GPT_IMAGE_PRICING[finalConfig.quality!]
     }));
-  } catch (error) {
-    console.error('Erreur GPT-Image:', error);
+  } catch (error: any) {
+    console.error('[GPT-Image] Erreur détaillée:', error);
+    console.error('[GPT-Image] Message:', error.message);
+    console.error('[GPT-Image] Status:', error.status);
+    console.error('[GPT-Image] Response:', error.response?.data);
     throw error;
   }
 }

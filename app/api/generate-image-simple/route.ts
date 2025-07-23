@@ -16,15 +16,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Lancer la génération en arrière-plan sans attendre
-    generateImagesInBackground(projet, projetId).catch(error => {
-      console.error('[generate-image-simple] Erreur background:', error);
+    // Lancer la première génération via le webhook
+    // Cela permet d'éviter les timeouts car chaque image est générée séparément
+    fetch(`${getBaseUrl()}/api/generate-image-webhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        projet,
+        projetId,
+        imageIndex: 0
+      }),
+    }).catch(error => {
+      console.error('[generate-image-simple] Erreur lancement webhook:', error);
     });
 
     // Retourner immédiatement
     return NextResponse.json({
       success: true,
-      message: 'Génération d\'images lancée',
+      message: 'Génération d\'images lancée via webhook',
       projetId
     });
     
