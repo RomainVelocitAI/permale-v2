@@ -69,6 +69,9 @@ export class GitHubProvider implements UploadProvider {
   }
   
   async upload(file: File | Buffer | string, filename: string): Promise<string> {
+    console.log('[GitHubProvider] Début upload:', filename);
+    console.log('[GitHubProvider] Config:', { owner: this.owner, repo: this.repo, branch: this.branch });
+    
     try {
       // Générer un chemin unique pour l'image
       const date = new Date();
@@ -78,23 +81,29 @@ export class GitHubProvider implements UploadProvider {
       const randomString = Math.random().toString(36).substring(2, 8);
       const path = `projets/${year}/${month}/${timestamp}-${randomString}-${filename}`;
       
+      console.log('[GitHubProvider] Path généré:', path);
+      
       // Convertir l'image en base64 si nécessaire
       let content: string;
       if (typeof file === 'string') {
         // Si c'est déjà une data URL, extraire la partie base64
         if (file.startsWith('data:')) {
           content = file.split(',')[1];
+          console.log('[GitHubProvider] Data URL détectée, taille base64:', content.length);
         } else {
           content = file;
+          console.log('[GitHubProvider] String base64 directe, taille:', content.length);
         }
       } else if (Buffer.isBuffer(file)) {
         content = file.toString('base64');
+        console.log('[GitHubProvider] Buffer converti, taille base64:', content.length);
       } else {
         throw new Error('Unsupported file type for GitHub upload');
       }
       
       // Upload vers GitHub - utilise createFile au lieu de createOrUpdateFileContents
       // pour éviter les conflits SHA
+      console.log('[GitHubProvider] Appel API GitHub...');
       try {
         const response = await this.octokit.repos.createOrUpdateFileContents({
           owner: this.owner,
@@ -105,9 +114,16 @@ export class GitHubProvider implements UploadProvider {
           branch: this.branch
         });
         
+        console.log('[GitHubProvider] Upload réussi, response:', response.status);
+        
         // Retourner l'URL raw de l'image
-        return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/${path}`;
+        const rawUrl = `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/${path}`;
+        console.log('[GitHubProvider] URL générée:', rawUrl);
+        return rawUrl;
       } catch (error: any) {
+        console.error('[GitHubProvider] Erreur upload:', error.message);
+        console.error('[GitHubProvider] Status:', error.status);
+        console.error('[GitHubProvider] Response:', error.response?.data);
         // Si l'erreur est un conflit (409), réessayer avec un nouveau nom
         if (error.status === 409) {
           // File conflict detected, retrying with new filename
@@ -127,6 +143,7 @@ export class GitHubProvider implements UploadProvider {
         throw error;
       }
     } catch (error) {
+      console.error('[GitHubProvider] Erreur finale:', error);
       throw new Error(`Failed to upload to GitHub: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -221,6 +238,9 @@ export function createUploadService(): UploadService {
   const environment = process.env.NODE_ENV;
   const uploadProvider = process.env.UPLOAD_PROVIDER;
   
+  console.log('[createUploadService] Environment:', environment);
+  console.log('[createUploadService] Upload Provider:', uploadProvider);
+  
   // GitHub provider
   if (uploadProvider === 'github') {
     const config = {
@@ -229,6 +249,13 @@ export function createUploadService(): UploadService {
       repo: process.env.GITHUB_REPO || 'permale-images',
       branch: process.env.GITHUB_BRANCH || 'main'
     };
+    console.log('[createUploadService] Configuration GitHub:', {
+      owner: config.owner,
+      repo: config.repo,
+      branch: config.branch,
+      tokenExists: !!config.token,
+      tokenLength: config.token?.length
+    });
     return new UploadService(new GitHubProvider(config));
   }
   
