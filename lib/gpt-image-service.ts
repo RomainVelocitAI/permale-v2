@@ -69,11 +69,11 @@ export async function generateWithGPTImage(
       quality: finalConfig.quality,
     });
 
-    console.log('[GPT-Image] Réponse reçue:', response.data.length, 'images');
-
     if (!response.data || response.data.length === 0) {
       throw new Error('GPT-Image n\'a pas retourné d\'images');
     }
+
+    console.log('[GPT-Image] Réponse reçue:', response.data.length, 'images');
 
     return response.data.map((image) => ({
       url: image.url!,
