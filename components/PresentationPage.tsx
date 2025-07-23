@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Projet } from '@/types';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import logoPermale from '@/public/soloo fin blc.png';
 
 interface PresentationPageProps {
   projet: Projet;
@@ -158,11 +159,12 @@ function IntroSection({ projet }: { projet: Projet }) {
           transition={{ delay: 0.5, duration: 1.5, ease: "easeOut" }}
         >
           <Image 
-            src="/soloo fin blc.png" 
+            src={logoPermale} 
             alt="PERMALE" 
             width={400} 
             height={100} 
             className="mx-auto mb-12"
+            priority
           />
         </motion.div>
         
@@ -565,7 +567,7 @@ function ContactSection({ projet }: { projet: Projet }) {
           className="mt-16"
         >
           <Image 
-            src="/soloo fin blc.png" 
+            src={logoPermale} 
             alt="PERMALE" 
             width={200} 
             height={50} 
