@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Projet } from '@/types';
 import Image from 'next/image';
 import LuxuryImageGrid from './LuxuryImageGrid';
@@ -15,10 +15,66 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   const [imageTemporaire, setImageTemporaire] = useState('');
   const [saving, setSaving] = useState(false);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [checkingImages, setCheckingImages] = useState(false);
+  const [localGeneratedImages, setLocalGeneratedImages] = useState<string[]>([]);
 
+  // Récupérer les images depuis les champs imageIA1-4
+  const imagesIA = [
+    projet.imageIA1,
+    projet.imageIA2,
+    projet.imageIA3,
+    projet.imageIA4
+  ].filter(Boolean) as string[];
+  
+  // Utiliser les images du champ images ou les imagesIA
+  const generatedImages = localGeneratedImages.length > 0 
+    ? localGeneratedImages 
+    : (projet.images && projet.images.length > 0) 
+      ? projet.images.slice(0, 4) 
+      : imagesIA;
 
-  // Limiter à 4 images générées maximum pour les créations IA
-  const generatedImages = projet.images && projet.images.length > 0 ? projet.images.slice(0, 4) : [];
+  // Vérifier périodiquement si les images ont été générées
+  useEffect(() => {
+    // Si on a déjà des images, pas besoin de vérifier
+    if (generatedImages.length > 0) return;
+
+    const checkForImages = async () => {
+      if (checkingImages) return;
+      
+      setCheckingImages(true);
+      try {
+        const response = await fetch(`/api/projets?id=${projet.id}`);
+        if (response.ok) {
+          const updatedProjet = await response.json();
+          
+          // Vérifier les images IA
+          const newImagesIA = [
+            updatedProjet.imageIA1,
+            updatedProjet.imageIA2,
+            updatedProjet.imageIA3,
+            updatedProjet.imageIA4
+          ].filter(Boolean) as string[];
+          
+          // Vérifier le champ images
+          const newImages = updatedProjet.images || [];
+          
+          if (newImagesIA.length > 0 || newImages.length > 0) {
+            setLocalGeneratedImages(newImages.length > 0 ? newImages.slice(0, 4) : newImagesIA);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification des images:', error);
+      } finally {
+        setCheckingImages(false);
+      }
+    };
+
+    // Vérifier immédiatement puis toutes les 5 secondes
+    checkForImages();
+    const interval = setInterval(checkForImages, 5000);
+
+    return () => clearInterval(interval);
+  }, [projet.id, generatedImages.length, checkingImages]);
 
   const handleSelectImage = (imageUrl: string) => {
     setImageTemporaire(imageUrl);
@@ -252,16 +308,25 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
             {generatedImages.length === 0 ? (
               <div className="text-center py-16">
                 <div className="mb-6">
-                  <svg className="w-16 h-16 text-[#acae9f] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#acae9f]/10">
+                    <svg className="w-8 h-8 text-[#acae9f] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
                 </div>
-                <p className="text-[#acae9f] text-lg mb-2" style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}>
-                  Aucune création visuelle générée
+                <p className="text-[#363d43] text-lg mb-2 font-light" style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}>
+                  Génération des visuels en cours...
                 </p>
-                <p className="text-[#acae9f] text-sm" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
-                  Les images seront générées par notre IA créative
+                <p className="text-[#363d43]/60 text-sm mb-4" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+                  Notre IA créative est en train de concevoir 4 visualisations uniques de votre bijou
                 </p>
+                <div className="inline-flex items-center gap-2 text-xs text-[#acae9f] uppercase tracking-[0.15em]" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Traitement en cours • GPT-Image 1</span>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">

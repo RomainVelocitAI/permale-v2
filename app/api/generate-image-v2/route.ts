@@ -24,49 +24,60 @@ export async function POST(request: NextRequest) {
 
     // Estimer le coût (GPT-4.1 Nano + GPT-Image)
     const gptNanoCost = 0.001; // Coût estimé pour la génération du prompt
-    const imageCost = 0.02; // Prix pour qualité 'low'
+    const imageCost = 0.02 * 4; // Prix pour qualité 'low' x 4 images
     const totalCost = gptNanoCost + imageCost;
     
     console.log('[API] Génération d\'image avec GPT-4.1 Nano + GPT-Image');
     console.log('[API] Coût estimé total:', totalCost, '€');
 
-    // Générer l'image avec le nouveau service
-    const result = await GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
-      quality: 'low',
-      returnBase64: false
-    });
+    // Générer 4 images avec le nouveau service
+    const results = await Promise.all(
+      Array(4).fill(null).map(() => 
+        GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
+          quality: 'standard',
+          returnBase64: false
+        })
+      )
+    );
     
-    const imageUrl = result.imageUrl;
+    const images = results.map(result => result.imageUrl);
 
-    // Convertir l'URL en base64 pour l'upload
-    let base64: string | undefined;
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      
-      base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          resolve(result);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('[API] Erreur conversion base64:', error);
-      // Continuer sans base64 si la conversion échoue
+    // Convertir les URLs en base64 pour l'upload
+    const base64Images: (string | undefined)[] = [];
+    for (const imageUrl of images) {
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        base64Images.push(base64);
+      } catch (error) {
+        console.error('[API] Erreur conversion base64:', error);
+        base64Images.push(undefined);
+      }
     }
 
     return NextResponse.json({
       success: true,
       result: {
-        imageUrl,
-        base64,
-        prompt: result.prompt,
+        images: images.map((url, index) => ({
+          url,
+          base64: base64Images[index],
+          index: index + 1
+        })),
+        prompt: results[0].prompt,
         model: 'gpt-4.1-nano + gpt-image-1',
-        generationMethod: result.generationMethod,
-        cost: totalCost
+        generationMethod: results[0].generationMethod,
+        cost: totalCost,
+        count: 4
       },
       estimatedCost: totalCost
     });
@@ -112,7 +123,7 @@ export async function POST(request: NextRequest) {
 // Route GET pour obtenir les informations sur le nouveau système
 export async function GET() {
   const gptNanoCost = 0.001;
-  const imageCost = 0.02;
+  const imageCost = 0.02 * 4; // 4 images
   const totalCost = gptNanoCost + imageCost;
 
   return NextResponse.json({
@@ -128,7 +139,7 @@ export async function GET() {
     currentConfig: {
       promptModel: 'gpt-4.1-nano',
       imageModel: 'gpt-image-1',
-      size: '1024x1024',
+      size: '512x512',
       quality: 'low',
       outputFormat: 'png',
       moderation: 'auto'
@@ -148,64 +159,5 @@ export async function GET() {
   });
 }
 
-// Route POST pour prévisualiser uniquement le prompt
-export async function POST_PREVIEW(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { projet } = body;
-
-    if (!projet) {
-      return NextResponse.json(
-        { error: 'Données du projet manquantes' },
-        { status: 400 }
-      );
-    }
-
-    // Générer uniquement le prompt
-    const prompt = await GPTImageJewelryServiceV2.previewPrompt(projet as Partial<Projet>);
-
-    return NextResponse.json({
-      success: true,
-      prompt,
-      cost: 0.001 // Coût GPT-4.1 Nano uniquement
-    });
-
-  } catch (error) {
-    console.error('[API] Erreur lors de la génération du prompt:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la génération du prompt' },
-      { status: 500 }
-    );
-  }
-}
-
-// Route POST pour comparer ancien vs nouveau système
-export async function POST_COMPARE(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { projet } = body;
-
-    if (!projet) {
-      return NextResponse.json(
-        { error: 'Données du projet manquantes' },
-        { status: 400 }
-      );
-    }
-
-    // Comparer les deux systèmes
-    const comparison = await GPTImageJewelryServiceV2.comparePrompts(projet as Partial<Projet>);
-
-    return NextResponse.json({
-      success: true,
-      comparison,
-      recommendation: 'Le nouveau système avec GPT-4.1 Nano est fortement recommandé pour une meilleure qualité.'
-    });
-
-  } catch (error) {
-    console.error('[API] Erreur lors de la comparaison:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la comparaison des systèmes' },
-      { status: 500 }
-    );
-  }
-}
+// Note: Pour prévisualiser le prompt ou comparer les systèmes, 
+// utilisez l'endpoint POST principal avec un paramètre 'action' dans le body

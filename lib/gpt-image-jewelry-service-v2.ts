@@ -13,7 +13,7 @@ export class GPTImageJewelryServiceV2 {
   static async generateJewelryImage(
     projet: Partial<Projet>,
     options: {
-      quality?: 'low' | 'standard' | 'high';
+      quality?: 'standard' | 'hd';
       returnBase64?: boolean;
     } = {}
   ) {
@@ -33,10 +33,11 @@ export class GPTImageJewelryServiceV2 {
       });
 
       if (options.returnBase64) {
-        const result = await generateBase64WithGPTImage(prompt, {
-          quality: options.quality || 'low'
-        });
+        const results = await generateBase64WithGPTImage(prompt, {
+          quality: options.quality || 'standard'
+        }, 1);
         
+        const result = results[0];
         return {
           ...result,
           prompt,
@@ -44,10 +45,11 @@ export class GPTImageJewelryServiceV2 {
           generationMethod: 'gpt-4.1-nano'
         };
       } else {
-        const result = await generateWithGPTImage(prompt, {
-          quality: options.quality || 'low'
-        });
+        const results = await generateWithGPTImage(prompt, {
+          quality: options.quality || 'standard'
+        }, 1);
         
+        const result = results[0];
         // Convertir en base64 si nécessaire
         const base64 = await imageUrlToBase64(result.url);
         
@@ -100,7 +102,7 @@ export class GPTImageJewelryServiceV2 {
     }
     
     // Vérifier la langue (anglais pour GPT-Image)
-    if (newPrompt.match(/[a-zA-Z]/g)?.length || 0 > oldPrompt.match(/[a-zA-Z]/g)?.length || 0) {
+    if ((newPrompt.match(/[a-zA-Z]/g)?.length || 0) > (oldPrompt.match(/[a-zA-Z]/g)?.length || 0)) {
       improvements.push('✅ Meilleure utilisation de l\'anglais technique');
     }
     

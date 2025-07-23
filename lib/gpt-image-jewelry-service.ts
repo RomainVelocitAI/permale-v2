@@ -164,7 +164,7 @@ export class GPTImageJewelryService {
   static async generateJewelryImage(
     projet: Partial<Projet>,
     options: {
-      quality?: 'low' | 'medium' | 'high';
+      quality?: 'standard' | 'hd';
       returnBase64?: boolean;
     } = {}
   ) {
@@ -174,7 +174,7 @@ export class GPTImageJewelryService {
 
     if (options.returnBase64) {
       const results = await generateBase64WithGPTImage(prompt, {
-        quality: options.quality || 'low'
+        quality: options.quality || 'standard'
       }, 1);
       
       const result = results[0];

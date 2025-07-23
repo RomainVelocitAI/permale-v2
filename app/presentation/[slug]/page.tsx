@@ -56,7 +56,7 @@ export default function PresentationPage() {
     projet.imageIA3,
     projet.imageIA4,
     projet.imageIA5
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
