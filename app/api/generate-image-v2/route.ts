@@ -8,9 +8,19 @@ import { createUploadService } from '@/lib/upload-service';
 export const maxDuration = 300; // 5 minutes (maximum pour Netlify)
 
 export async function POST(request: NextRequest) {
+  console.log('[API generate-image-v2] Début de la requête');
+  console.log('[API generate-image-v2] Variables d\'environnement:', {
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'Set' : 'Not set',
+    GITHUB_TOKEN: process.env.GITHUB_TOKEN ? 'Set' : 'Not set',
+    UPLOAD_PROVIDER: process.env.UPLOAD_PROVIDER || 'Not set',
+  });
+  
   try {
     const body = await request.json();
     const { projet, projetId } = body;
+    
+    console.log('[API generate-image-v2] Projet ID:', projetId);
+    console.log('[API generate-image-v2] Type de bijou:', projet?.typeBijou);
 
     if (!projet) {
       return NextResponse.json(
@@ -21,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Vérifier la clé API OpenAI
     if (!process.env.OPENAI_API_KEY) {
+      console.error('[API generate-image-v2] OPENAI_API_KEY non définie');
       return NextResponse.json(
         { error: 'Configuration manquante: OPENAI_API_KEY requis pour GPT-4.1 Nano' },
         { status: 500 }
@@ -64,9 +75,11 @@ export async function POST(request: NextRequest) {
     results.push(...secondBatch);
     
     const images = results.map(result => result.imageUrl);
+    console.log(`[API] ${images.length} images générées avec succès`);
 
     // Convertir les URLs en base64 et uploader vers GitHub
     const uploadService = createUploadService();
+    console.log('[API] Service d\'upload:', process.env.UPLOAD_PROVIDER || 'local');
     const publicUrls: string[] = [];
     const base64Images: (string | undefined)[] = [];
     
