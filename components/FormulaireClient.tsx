@@ -112,18 +112,15 @@ export default function FormulaireClient() {
       if (data.id) {
         console.log('[FormulaireClient] Lancement de la génération d\'images pour projet ID:', data.id);
         
-        // Utiliser keepalive pour que la requête continue même après la navigation
-        fetch('/api/generate-image-v2', {
+        // Utiliser l'API simple qui retourne immédiatement
+        fetch('/api/generate-image-simple', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             projetId: data.id,
-            projet: formData,
-            mode: 'test',
-            generateMultiple: false,
-            async: true // Activer le mode asynchrone
+            projet: formData
           }),
           // keepalive permet à la requête de continuer même après navigation
           keepalive: true

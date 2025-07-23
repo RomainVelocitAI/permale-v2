@@ -39,35 +39,39 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Si mode async, déclencher la génération via webhook n8n
+    // Si mode async, déclencher la génération en arrière-plan
     if (async && projetId) {
-      console.log('[API generate-image-v2] Mode async activé - déclenchement webhook n8n');
+      console.log('[API generate-image-v2] Mode async activé - génération en arrière-plan');
       
-      // Appeler le webhook n8n pour déclencher la génération asynchrone
-      try {
-        const webhookUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/generate-images';
-        await fetch(webhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            projetId,
-            projet,
-            apiUrl: `${getBaseUrl()}/api/generate-image-async`
-          })
-        });
-        
-        return NextResponse.json({
-          success: true,
-          message: 'Génération d\'images déclenchée en arrière-plan',
-          projetId,
-          status: 'processing'
-        });
-      } catch (error) {
-        console.error('[API generate-image-v2] Erreur webhook n8n:', error);
-        // Continuer avec la génération synchrone en cas d'erreur
-      }
+      // Déclencher la génération asynchrone directement
+      const baseUrl = getBaseUrl();
+      
+      // Utiliser un setTimeout pour lancer la génération en arrière-plan
+      // sans bloquer la réponse
+      setTimeout(async () => {
+        try {
+          console.log('[API generate-image-v2] Déclenchement génération asynchrone');
+          await fetch(`${baseUrl}/api/generate-image-async`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              projetId,
+              projet
+            })
+          });
+        } catch (error) {
+          console.error('[API generate-image-v2] Erreur génération asynchrone:', error);
+        }
+      }, 100);
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Génération d\'images déclenchée en arrière-plan',
+        projetId,
+        status: 'processing'
+      });
     }
 
     // Estimer le coût (GPT-4.1 Nano + DALL-E 3)
