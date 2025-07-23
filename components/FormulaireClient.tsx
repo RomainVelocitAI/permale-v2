@@ -24,6 +24,9 @@ export default function FormulaireClient() {
   const [photosModele, setPhotosModele] = useState<File[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [veutGravure, setVeutGravure] = useState<boolean | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<{ url: string; base64: string } | null>(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -57,6 +60,45 @@ export default function FormulaireClient() {
     }
   };
 
+  // Fonction pour générer l'image IA
+  const handleGenerateImage = async () => {
+    if (!formData.description) return;
+
+    setGeneratingImage(true);
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projet: formData,
+          mode: 'test', // Mode test pour images basse résolution à 0.02€
+          generateMultiple: false // Une seule image composite
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de la génération');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.result) {
+        setGeneratedImage({
+          url: data.result.imageUrl,
+          base64: data.result.base64 || ''
+        });
+      }
+    } catch (error) {
+      console.error('Erreur génération image:', error);
+      alert('Erreur lors de la génération de l\'image. Veuillez réessayer.');
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
   // Fonction pour convertir les fichiers en base64
   const convertFilesToBase64 = async (files: File[]): Promise<{ data: string; filename: string }[]> => {
     const promises = files.map((file) => {
@@ -87,6 +129,15 @@ export default function FormulaireClient() {
         photosModeleData = await convertFilesToBase64(photosModele);
       }
 
+      // Préparer les images générées si présentes
+      let imagesGenerated = [];
+      if (generatedImage && generatedImage.base64) {
+        imagesGenerated = [{
+          data: generatedImage.base64,
+          filename: 'visualisation-ia.png'
+        }];
+      }
+
       const response = await fetch('/api/projets', {
         method: 'POST',
         headers: {
@@ -95,7 +146,8 @@ export default function FormulaireClient() {
         body: JSON.stringify({
           ...formData,
           gravure: veutGravure ? formData.gravure : '',
-          photosModele: photosModeleData
+          photosModele: photosModeleData,
+          imagesGenerated: imagesGenerated // Ajouter l'image générée
         }),
       });
 
@@ -390,6 +442,94 @@ export default function FormulaireClient() {
                       )}
                     </div>
                   )}
+
+                  {/* Génération d'image IA */}
+                  <div className="mt-10 pt-10 border-t border-[#363d43]/10">
+                    <label className="block text-sm font-medium text-[#363d43] mb-6 tracking-[0.15em] uppercase text-center" style={{ fontFamily: 'Roboto Condensed' }}>
+                      Visualisation IA
+                    </label>
+                    <div className="text-center">
+                      <p className="text-sm text-[#363d43]/70 mb-6" style={{ fontFamily: 'Roboto Condensed' }}>
+                        Générez une visualisation 3D de votre bijou basée sur votre description
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleGenerateImage}
+                        disabled={generatingImage || !formData.description}
+                        className={`inline-flex items-center px-8 py-3 border text-sm font-light tracking-[0.15em] transition-all duration-300 rounded-sm ${
+                          generatingImage || !formData.description
+                            ? 'border-[#363d43]/20 bg-gray-100 text-[#363d43]/40 cursor-not-allowed'
+                            : 'border-[#acae9f] bg-[#acae9f] text-[#363d43] hover:bg-[#363d43] hover:text-[#efefef]'
+                        }`}
+                        style={{ fontFamily: 'Roboto Condensed' }}
+                      >
+                        {generatingImage ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Génération en cours...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Générer avec GPT-Image
+                          </>
+                        )}
+                      </button>
+                      {!formData.description && (
+                        <p className="text-xs text-[#363d43]/50 mt-2" style={{ fontFamily: 'Roboto Condensed' }}>
+                          Veuillez d'abord décrire votre bijou
+                        </p>
+                      )}
+                      {formData.description && (
+                        <p className="text-xs text-[#363d43]/50 mt-2" style={{ fontFamily: 'Roboto Condensed' }}>
+                          GPT-Image 1 • Qualité test • 0.02€ par image
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Affichage de l'image générée */}
+                    {generatedImage && (
+                      <div className="mt-8">
+                        <div className="relative max-w-2xl mx-auto">
+                          <img
+                            src={generatedImage.url}
+                            alt="Visualisation du bijou"
+                            className="w-full h-auto rounded-sm shadow-lg"
+                          />
+                          <div className="absolute top-4 right-4 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={handleGenerateImage}
+                              className="p-2 bg-white/90 rounded-sm shadow hover:bg-white transition-colors"
+                              title="Régénérer"
+                            >
+                              <svg className="w-5 h-5 text-[#363d43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setGeneratedImage(null)}
+                              className="p-2 bg-white/90 rounded-sm shadow hover:bg-white transition-colors"
+                              title="Supprimer"
+                            >
+                              <svg className="w-5 h-5 text-[#363d43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#363d43]/50 text-center mt-4" style={{ fontFamily: 'Roboto Condensed' }}>
+                          Image générée par GPT-Image 1 • Représentation conceptuelle basée sur votre description
+                        </p>
+                      </div>
+                    )}
+                  }
                 </div>
 
                 <div className="flex justify-center gap-4 pt-12">

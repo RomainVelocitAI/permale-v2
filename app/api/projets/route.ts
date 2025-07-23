@@ -55,6 +55,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Gérer l'upload des images générées par IA
+    let uploadedGeneratedUrls: string[] = [];
+    if (body.imagesGenerated && body.imagesGenerated.length > 0) {
+      const uploadService = createUploadService();
+      
+      // Extraire les données et noms de fichiers
+      const imagesData = body.imagesGenerated.map((photo: { data: string; filename: string }) => photo.data);
+      const filenames = body.imagesGenerated.map((photo: { data: string; filename: string }) => photo.filename);
+      
+      try {
+        // Upload les images et récupérer les URLs
+        uploadedGeneratedUrls = await uploadService.uploadImages(imagesData, filenames);
+      } catch (uploadError) {
+        // En cas d'erreur d'upload, on continue sans les images
+      }
+    }
+
     // Créer le projet dans Airtable
     const nouveauProjet = await createProjet({
       nom: body.nom || '',
@@ -70,6 +87,8 @@ export async function POST(request: NextRequest) {
       budget: body.budget || '',
       dateLivraison: body.dateLivraison || '',
       gravure: body.gravure || '',
+      images: uploadedGeneratedUrls, // Ajouter les images générées par IA
+      imageSelectionnee: uploadedGeneratedUrls.length > 0 ? uploadedGeneratedUrls[0] : undefined,
     });
 
     // Image generation API will be called here

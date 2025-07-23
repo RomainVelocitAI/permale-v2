@@ -1,6 +1,7 @@
 import Airtable from 'airtable';
 // Import types from the types directory
 import { Projet, TypeBijou } from '@/types';
+import { generatePresentationUrl } from '@/lib/utils';
 
 // Lazy initialization of Airtable
 let base: any;
@@ -88,7 +89,20 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
     
     fields['Date de creation'] = new Date().toISOString();
     
+    // Créer d'abord l'enregistrement pour obtenir l'ID
     const record = await table.create(fields);
+    
+    // Générer l'URL de présentation avec l'ID du record
+    const urlPresentation = generatePresentationUrl(
+      projet.nom || 'client',
+      projet.prenom || 'projet',
+      record.id
+    );
+    
+    // Mettre à jour le record avec l'URL de présentation
+    await table.update(record.id, {
+      'URL Presentation': urlPresentation
+    });
 
     const photosUrls = extractPhotosUrls(record.get('Images'));
     
@@ -114,7 +128,7 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       imageIA3: record.get('imageIA3') as string || '',
       imageIA4: record.get('imageIA4') as string || '',
       imageIA5: record.get('imageIA5') as string || '',
-      urlPresentation: record.get('URL Presentation') as string || '',
+      urlPresentation: urlPresentation, // Utiliser l'URL générée
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };
   } catch (error) {
@@ -214,16 +228,7 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
     if (updates.imageIA5) fieldsToUpdate['imageIA5'] = updates.imageIA5;
     if (updates.urlPresentation) fieldsToUpdate['URL Presentation'] = updates.urlPresentation;
     
-    // Si toutes les images IA sont présentes et qu'il n'y a pas encore d'URL de présentation
-    if ((updates.imageIA1 || updates.imageIA2 || updates.imageIA3 || updates.imageIA4 || updates.imageIA5) && !updates.urlPresentation) {
-      // Récupérer le projet actuel pour avoir le nom et prénom
-      const currentProject = await getProjetById(id);
-      if (currentProject) {
-        // Générer l'URL de présentation
-        const slug = `${currentProject.nom.toLowerCase()}-${currentProject.prenom.toLowerCase()}-${id}`;
-        fieldsToUpdate['URL Presentation'] = `https://permale.com/${slug}`;
-      }
-    }
+    // L'URL de présentation est maintenant générée automatiquement à la création
     
     const record = await table.update(id, fieldsToUpdate);
     
