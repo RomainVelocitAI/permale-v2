@@ -424,7 +424,7 @@ export default function FormulaireClient() {
                         <br />basée sur votre description après validation du formulaire
                       </p>
                       <p className="text-xs text-[#363d43]/50 mt-2" style={{ fontFamily: 'Roboto Condensed' }}>
-                        GPT-Image 1 • Qualité test • 0.02€ par image
+                        GPT-4.1 Nano + DALL-E 3 • 4 images • 0.161€ total
                       </p>
                     </div>
                   </div>
