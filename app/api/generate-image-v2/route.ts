@@ -124,7 +124,10 @@ export async function POST(request: NextRequest) {
         base64Images.push(base64);
         
         // Uploader vers GitHub pour obtenir une URL publique permanente
-        const filename = `visualisation-ia-v2-${i + 1}.${isPNG ? 'png' : 'jpg'}`;
+        // Utiliser l'ID du projet ou un identifiant unique pour éviter les écrasements
+        const uniqueId = projetId || Date.now().toString();
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const filename = `projet-${uniqueId}-image-${i + 1}-${randomSuffix}.${isPNG ? 'png' : 'jpg'}`;
         const publicUrl = await uploadService.uploadImage(base64, filename);
         publicUrls.push(publicUrl);
         console.log(`[API] Image ${i + 1} uploadée vers GitHub:`, publicUrl);
