@@ -85,7 +85,14 @@ export async function POST(request: NextRequest) {
     
     for (let i = 0; i < images.length; i++) {
       try {
-        const response = await fetch(images[i]);
+        console.log(`[API] Téléchargement de l'image ${i + 1}:`, images[i]);
+        
+        const response = await fetch(images[i], {
+          method: 'GET',
+          headers: {
+            'Accept': 'image/png,image/jpeg,image/*'
+          }
+        });
         
         // Vérifier que la réponse est valide
         if (!response.ok) {
@@ -105,15 +112,24 @@ export async function POST(request: NextRequest) {
         
         console.log(`[API] Taille de l'image ${i + 1}:`, buffer.length, 'bytes');
         
-        const base64 = `data:image/png;base64,${buffer.toString('base64')}`;
+        // Vérifier la signature de l'image
+        const signature = buffer.slice(0, 8).toString('hex');
+        const isPNG = signature === '89504e470d0a1a0a';
+        const isJPEG = signature.startsWith('ffd8ff');
+        console.log(`[API] Image ${i + 1} - PNG: ${isPNG}, JPEG: ${isJPEG}, Signature: ${signature}`);
+        
+        // Déterminer le type MIME correct
+        const mimeType = isPNG ? 'image/png' : isJPEG ? 'image/jpeg' : 'image/png';
+        const base64 = `data:${mimeType};base64,${buffer.toString('base64')}`;
         base64Images.push(base64);
         
         // Uploader vers GitHub pour obtenir une URL publique permanente
-        const publicUrl = await uploadService.uploadImage(base64, `visualisation-ia-v2-${i + 1}.png`);
+        const filename = `visualisation-ia-v2-${i + 1}.${isPNG ? 'png' : 'jpg'}`;
+        const publicUrl = await uploadService.uploadImage(base64, filename);
         publicUrls.push(publicUrl);
         console.log(`[API] Image ${i + 1} uploadée vers GitHub:`, publicUrl);
       } catch (error) {
-        console.error('[API] Erreur conversion/upload image:', error);
+        console.error(`[API] Erreur conversion/upload image ${i + 1}:`, error);
         base64Images.push(undefined);
         publicUrls.push(images[i]); // Fallback vers l'URL OpenAI temporaire
       }

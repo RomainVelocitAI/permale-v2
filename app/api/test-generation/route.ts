@@ -32,13 +32,41 @@ export async function GET(request: NextRequest) {
     
     console.log('[TEST API] Image générée:', result.imageUrl);
     
-    // 3. Tester l'upload GitHub
+    // 3. Tester l'upload GitHub avec l'image générée
     const uploadService = createUploadService();
-    console.log('[TEST API] Test upload GitHub...');
+    console.log('[TEST API] Test upload GitHub avec image générée...');
     
-    // Créer une petite image de test
-    const testBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-    const uploadUrl = await uploadService.uploadImage(testBase64, 'test-api.png');
+    // Télécharger l'image générée et la convertir correctement
+    const imageResponse = await fetch(result.imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Erreur téléchargement image: ${imageResponse.status}`);
+    }
+    
+    const contentType = imageResponse.headers.get('content-type');
+    console.log('[TEST API] Type de contenu:', contentType);
+    
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const buffer = Buffer.from(imageBuffer);
+    
+    // Vérifier que l'image n'est pas vide
+    if (buffer.length === 0) {
+      throw new Error('Buffer vide reçu');
+    }
+    
+    console.log('[TEST API] Taille image téléchargée:', buffer.length, 'bytes');
+    console.log('[TEST API] Premiers bytes:', buffer.slice(0, 20).toString('hex'));
+    
+    // Vérifier la signature PNG
+    const pngSignature = buffer.slice(0, 8).toString('hex');
+    const isPNG = pngSignature === '89504e470d0a1a0a';
+    console.log('[TEST API] Signature PNG valide:', isPNG, 'Signature:', pngSignature);
+    
+    // Créer la data URL avec le bon format
+    const base64String = buffer.toString('base64');
+    const dataUrl = `data:image/png;base64,${base64String}`;
+    
+    // Upload vers GitHub
+    const uploadUrl = await uploadService.uploadImage(dataUrl, 'test-api-generated.png');
     
     console.log('[TEST API] Upload réussi:', uploadUrl);
     
