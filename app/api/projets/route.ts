@@ -141,16 +141,33 @@ Le prompt doit décrire le bijou de manière détaillée et professionnelle pour
         source: 'permale-form'
       };
       
-      // Appel webhook n8n sans attendre la réponse
-      fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
-      }).catch(err => {
+      // Appel webhook n8n
+      console.log('[POST /api/projets] Envoi webhook n8n avec projetId:', nouveauProjet.id);
+      console.log('[POST /api/projets] Webhook URL:', 'https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
+      console.log('[POST /api/projets] Webhook data:', JSON.stringify(webhookData, null, 2));
+      
+      try {
+        const webhookResponse = await fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+        });
+        
+        console.log('[POST /api/projets] Webhook response status:', webhookResponse.status);
+        console.log('[POST /api/projets] Webhook response headers:', webhookResponse.headers);
+        
+        if (!webhookResponse.ok) {
+          const responseText = await webhookResponse.text();
+          console.error('[POST /api/projets] Webhook response error:', responseText);
+        } else {
+          const responseData = await webhookResponse.text();
+          console.log('[POST /api/projets] Webhook response success:', responseData);
+        }
+      } catch (err) {
         console.error('[POST /api/projets] Erreur webhook n8n:', err);
-      });
+      }
     }
 
     return NextResponse.json(nouveauProjet, { status: 201 });
