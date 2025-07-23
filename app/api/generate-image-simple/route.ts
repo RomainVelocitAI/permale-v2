@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
 // Fonction qui génère les images en arrière-plan
 async function generateImagesInBackground(projet: any, projetId: string) {
   console.log('[Background] Début génération pour:', projetId);
+  console.log('[Background] Projet data:', JSON.stringify(projet));
   
   const uploadService = createUploadService();
   const publicUrls: string[] = [];
@@ -47,6 +48,7 @@ async function generateImagesInBackground(projet: any, projetId: string) {
   for (let i = 0; i < 4; i++) {
     try {
       console.log(`[Background] Génération image ${i + 1}/4...`);
+      console.log('[Background] Appel GPTImageJewelryServiceV2.generateJewelryImage...');
       
       // Générer l'image
       const result = await GPTImageJewelryServiceV2.generateJewelryImage(projet, {
@@ -54,10 +56,14 @@ async function generateImagesInBackground(projet: any, projetId: string) {
         returnBase64: false
       });
       
+      console.log('[Background] Image générée, URL:', result.imageUrl);
+      
       // Télécharger et convertir
+      console.log('[Background] Téléchargement de l\'image...');
       const response = await fetch(result.imageUrl);
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      console.log('[Background] Image téléchargée, taille:', buffer.length);
       
       // Upload vers GitHub
       const signature = buffer.slice(0, 8).toString('hex');
@@ -67,13 +73,16 @@ async function generateImagesInBackground(projet: any, projetId: string) {
       
       const randomSuffix = Math.random().toString(36).substring(2, 8);
       const filename = `projet-${projetId}-image-${i + 1}-${randomSuffix}.${isPNG ? 'png' : 'jpg'}`;
+      
+      console.log('[Background] Upload vers GitHub, filename:', filename);
       const publicUrl = await uploadService.uploadImage(base64, filename);
       
       publicUrls.push(publicUrl);
-      console.log(`[Background] Image ${i + 1} uploadée:`, publicUrl);
+      console.log(`[Background] Image ${i + 1} uploadée avec succès:`, publicUrl);
       
     } catch (error) {
-      console.error(`[Background] Erreur image ${i + 1}:`, error);
+      console.error(`[Background] Erreur détaillée image ${i + 1}:`, error);
+      console.error(`[Background] Stack trace:`, error instanceof Error ? error.stack : 'N/A');
     }
   }
   

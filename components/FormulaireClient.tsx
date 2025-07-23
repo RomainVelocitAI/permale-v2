@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TypeBijou } from '@/types';
+import { SuccessNotification } from './SuccessNotification';
 
 const typesBijoux: TypeBijou[] = [
   'Alliance',
@@ -23,6 +24,7 @@ export default function FormulaireClient() {
   const [photosModele, setPhotosModele] = useState<File[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [veutGravure, setVeutGravure] = useState<boolean | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -149,13 +151,13 @@ export default function FormulaireClient() {
         });
       }
 
-      // Afficher un message de succès
-      alert('Projet créé avec succès ! Les images seront générées dans quelques instants.');
+      // Afficher la notification de succès
+      setShowNotification(true);
       
-      // Petit délai avant la redirection pour s'assurer que la requête est lancée
+      // Redirection après un délai
       setTimeout(() => {
         router.push('/projets');
-      }, 500);
+      }, 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur s\'est produite';
       alert(`Erreur lors de la création du projet: ${errorMessage}`);
@@ -169,6 +171,13 @@ export default function FormulaireClient() {
 
   return (
     <>
+      <SuccessNotification
+        show={showNotification}
+        onClose={() => setShowNotification(false)}
+        title="PROJET CRÉÉ"
+        message="Votre projet a été enregistré avec succès. Les visualisations 3D sont en cours de génération."
+      />
+      
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;700&display=swap');
         

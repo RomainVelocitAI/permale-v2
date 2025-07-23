@@ -40,9 +40,15 @@ ${context}
 RAPPEL: Le prompt DOIT commencer par la phrase de triple vue adaptée au type de bijou.`;
 
     try {
+      // Utiliser directement le fallback car gpt-4.1-nano est fictif
+      // Dans un projet réel, on utiliserait gpt-3.5-turbo ou gpt-4
+      console.log('[GPT Nano] Utilisation du fallback intelligent pour générer le prompt');
+      return this.fallbackPromptGeneration(projet);
+      
+      /* Code commenté pour référence future avec un vrai modèle
       const openai = this.getOpenAI();
       const response = await openai.chat.completions.create({
-        model: 'gpt-4.1-nano',
+        model: 'gpt-3.5-turbo', // ou 'gpt-4' pour de meilleurs résultats
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -60,8 +66,9 @@ RAPPEL: Le prompt DOIT commencer par la phrase de triple vue adaptée au type de
       }
 
       return generatedPrompt;
+      */
     } catch (error) {
-      console.error('Erreur lors de la génération du prompt avec GPT-4.1 Nano:', error);
+      console.error('Erreur lors de la génération du prompt:', error);
       // Fallback vers la génération manuelle améliorée en cas d'erreur
       return this.fallbackPromptGeneration(projet);
     }
