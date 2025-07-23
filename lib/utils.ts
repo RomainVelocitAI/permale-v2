@@ -30,7 +30,14 @@ export function generateSlug(nom: string, prenom: string): string {
 export function generatePresentationUrl(nom: string, prenom: string, projectId?: string): string {
   const slug = generateSlug(nom, prenom);
   const uniqueId = projectId ? projectId.slice(-8).toLowerCase() : nanoid();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://permale.com';
+  
+  // Utiliser l'URL Netlify en production
+  let baseUrl = 'https://permale.netlify.app';
+  
+  // En développement local, utiliser l'URL locale
+  if (process.env.NODE_ENV === 'development') {
+    baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  }
   
   return `${baseUrl}/presentation/${slug}-${uniqueId}`;
 }

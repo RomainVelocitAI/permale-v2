@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GPTImageJewelryServiceV2 } from '@/lib/gpt-image-jewelry-service-v2';
 import { Projet } from '@/types';
+import { getBaseUrl } from '@/lib/config';
+import { createUploadService } from '@/lib/upload-service';
+
+// Augmenter le timeout pour Netlify (10 secondes par défaut)
+export const maxDuration = 60; // 60 secondes
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { projet } = body;
+    const { projet, projetId } = body;
 
     if (!projet) {
       return NextResponse.json(
@@ -23,30 +28,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Estimer le coût (GPT-4.1 Nano + DALL-E 3)
+    const numberOfImages = 2; // Réduit à 2 pour éviter les timeouts
     const gptNanoCost = 0.001; // Coût estimé pour la génération du prompt (~300 tokens)
-    const imageCost = 0.04 * 4; // Prix pour DALL-E 3 qualité 'standard' x 4 images
+    const imageCost = 0.04 * numberOfImages; // Prix pour DALL-E 3 qualité 'standard'
     const totalCost = gptNanoCost + imageCost;
     
     console.log('[API] Génération avec GPT-4.1 Nano + DALL-E 3');
-    console.log('[API] Coût estimé total:', totalCost, '€ (0.001€ prompt + 0.16€ images)');
+    console.log(`[API] Coût estimé total: ${totalCost}€ (0.001€ prompt + ${imageCost}€ pour ${numberOfImages} images)`);
 
-    // Générer 4 images avec le nouveau service
-    const results = await Promise.all(
-      Array(4).fill(null).map(() => 
-        GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
-          quality: 'standard',
-          returnBase64: false
-        })
-      )
-    );
+    // Générer les images
+    const results = [];
+    
+    // Générer les images de manière séquentielle pour éviter les timeouts
+    for (let i = 0; i < numberOfImages; i++) {
+      console.log(`[API] Génération de l'image ${i + 1}/${numberOfImages}...`);
+      const result = await GPTImageJewelryServiceV2.generateJewelryImage(projet as Partial<Projet>, {
+        quality: 'standard',
+        returnBase64: false
+      });
+      results.push(result);
+    }
     
     const images = results.map(result => result.imageUrl);
 
-    // Convertir les URLs en base64 pour l'upload
+    // Convertir les URLs en base64 et uploader vers GitHub
+    const uploadService = createUploadService();
+    const publicUrls: string[] = [];
     const base64Images: (string | undefined)[] = [];
-    for (const imageUrl of images) {
+    
+    for (let i = 0; i < images.length; i++) {
       try {
-        const response = await fetch(imageUrl);
+        const response = await fetch(images[i]);
         const blob = await response.blob();
         
         const base64 = await new Promise<string>((resolve, reject) => {
@@ -59,9 +71,55 @@ export async function POST(request: NextRequest) {
           reader.readAsDataURL(blob);
         });
         base64Images.push(base64);
+        
+        // Uploader vers GitHub pour obtenir une URL publique permanente
+        const publicUrl = await uploadService.uploadImage(base64, `visualisation-ia-v2-${i + 1}.png`);
+        publicUrls.push(publicUrl);
+        console.log(`[API] Image ${i + 1} uploadée vers GitHub:`, publicUrl);
       } catch (error) {
-        console.error('[API] Erreur conversion base64:', error);
+        console.error('[API] Erreur conversion/upload image:', error);
         base64Images.push(undefined);
+        publicUrls.push(images[i]); // Fallback vers l'URL OpenAI temporaire
+      }
+    }
+
+    // Si on a un ID de projet, mettre à jour Airtable avec les URLs publiques
+    if (projetId && publicUrls.length > 0) {
+      try {
+        // Préparer les images pour Airtable (URLs publiques depuis GitHub)
+        const imagesForAirtable = publicUrls.map((url, index) => ({
+          url: url,
+          filename: `visualisation-ia-v2-${index + 1}.png`
+        }));
+        
+        // Préparer aussi les champs individuels imageIA1-4
+        const imageFields: any = {
+          id: projetId,
+          images: imagesForAirtable
+        };
+        
+        // Ajouter les URLs aux champs individuels imageIA1-4
+        publicUrls.forEach((url, index) => {
+          if (index < 4) {
+            imageFields[`imageIA${index + 1}`] = url;
+          }
+        });
+        
+        const updateResponse = await fetch(`${getBaseUrl()}/api/projets`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(imageFields),
+        });
+
+        if (!updateResponse.ok) {
+          console.error('[API] Erreur lors de la mise à jour Airtable');
+        } else {
+          console.log('[API] Images mises à jour dans Airtable avec succès');
+        }
+      } catch (error) {
+        console.error('[API] Erreur lors de la mise à jour des images dans Airtable:', error);
       }
     }
 
@@ -70,6 +128,7 @@ export async function POST(request: NextRequest) {
       result: {
         images: images.map((url, index) => ({
           url,
+          publicUrl: publicUrls[index] || url,
           base64: base64Images[index],
           index: index + 1
         })),
@@ -77,7 +136,7 @@ export async function POST(request: NextRequest) {
         model: 'gpt-4.1-nano + dall-e-3',
         generationMethod: results[0].generationMethod,
         cost: totalCost,
-        count: 4
+        count: numberOfImages
       },
       estimatedCost: totalCost
     });
@@ -122,8 +181,9 @@ export async function POST(request: NextRequest) {
 
 // Route GET pour obtenir les informations sur le nouveau système
 export async function GET() {
+  const numberOfImages = 2;
   const gptNanoCost = 0.001;
-  const imageCost = 0.02 * 4; // 4 images
+  const imageCost = 0.04 * numberOfImages; // DALL-E 3 standard quality
   const totalCost = gptNanoCost + imageCost;
 
   return NextResponse.json({
@@ -138,9 +198,10 @@ export async function GET() {
     ],
     currentConfig: {
       promptModel: 'gpt-4.1-nano',
-      imageModel: 'gpt-image-1',
-      size: '512x512',
-      quality: 'low',
+      imageModel: 'dall-e-3',
+      size: '1024x1024',
+      quality: 'standard',
+      numberOfImages: numberOfImages,
       outputFormat: 'png',
       moderation: 'auto'
     },
