@@ -108,11 +108,11 @@ export default function FormulaireClient() {
 
       const data = await response.json();
       
-      // Lancer la génération d'images en arrière-plan
+      // Lancer la génération d'images et attendre qu'elle soit initiée
       if (data.id) {
         console.log('[FormulaireClient] Lancement de la génération d\'images pour projet ID:', data.id);
         
-        // Appel API pour générer les images
+        // Utiliser keepalive pour que la requête continue même après la navigation
         fetch('/api/generate-image-v2', {
           method: 'POST',
           headers: {
@@ -124,6 +124,8 @@ export default function FormulaireClient() {
             mode: 'test',
             generateMultiple: false
           }),
+          // keepalive permet à la requête de continuer même après navigation
+          keepalive: true
         })
         .then(async (imageResponse) => {
           console.log('[FormulaireClient] Réponse de generate-image-v2:', imageResponse.status);
@@ -149,7 +151,13 @@ export default function FormulaireClient() {
         });
       }
 
-      router.push('/projets');
+      // Afficher un message de succès
+      alert('Projet créé avec succès ! Les images seront générées dans quelques instants.');
+      
+      // Petit délai avant la redirection pour s'assurer que la requête est lancée
+      setTimeout(() => {
+        router.push('/projets');
+      }, 500);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur s\'est produite';
       alert(`Erreur lors de la création du projet: ${errorMessage}`);
