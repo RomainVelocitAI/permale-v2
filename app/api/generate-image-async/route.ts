@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         }
       });
       
-      await updateProjet(imageFields);
+      await updateProjet(projetId, imageFields);
       console.log('[API generate-image-async] Airtable mis à jour avec succès');
     }
     
