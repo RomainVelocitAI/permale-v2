@@ -11,6 +11,11 @@ export function middleware(request: NextRequest) {
   if (publicRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.next()
   }
+  
+  // Autoriser toutes les pages de présentation (format: /presentation/[id])
+  if (pathname.startsWith('/presentation/')) {
+    return NextResponse.next()
+  }
 
   // Vérifier le token d'authentification
   const token = request.cookies.get('auth-token')?.value
