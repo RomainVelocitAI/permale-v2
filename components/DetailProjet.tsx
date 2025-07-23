@@ -35,11 +35,11 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
 
   // Vérifier périodiquement si les images ont été générées
   useEffect(() => {
-    // Si on a déjà des images, pas besoin de vérifier
-    if (generatedImages.length > 0) return;
+    // Si on a déjà des images ou pas d'ID, pas besoin de vérifier
+    if (generatedImages.length > 0 || !projet.id) return;
 
     const checkForImages = async () => {
-      if (checkingImages) return;
+      if (checkingImages || !projet.id) return;
       
       setCheckingImages(true);
       try {
