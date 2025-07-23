@@ -122,7 +122,8 @@ export default function FormulaireClient() {
             projetId: data.id,
             projet: formData,
             mode: 'test',
-            generateMultiple: false
+            generateMultiple: false,
+            async: true // Activer le mode asynchrone
           }),
           // keepalive permet à la requête de continuer même après navigation
           keepalive: true
