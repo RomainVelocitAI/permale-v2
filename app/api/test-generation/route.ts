@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GPTImageJewelryServiceV2 } from '@/lib/gpt-image-jewelry-service-v2';
 import { createUploadService } from '@/lib/upload-service';
+import { TypeBijou } from '@/types';
 
 export async function GET(request: NextRequest) {
   console.log('[TEST API] Démarrage du test');
   
   const testProjet = {
-    typeBijou: 'Bague',
+    typeBijou: 'Bague' as TypeBijou,
     budget: '5000',
     description: 'Test de génération d\'image',
     occasion: 'Test',
