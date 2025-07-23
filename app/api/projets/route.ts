@@ -91,7 +91,67 @@ export async function POST(request: NextRequest) {
       imageSelectionnee: uploadedGeneratedUrls.length > 0 ? uploadedGeneratedUrls[0] : undefined,
     });
 
-    // Image generation API will be called here
+    // Envoi webhook n8n avec toutes les données du projet
+    if (nouveauProjet.id) {
+      const webhookData = {
+        // ID Airtable du projet
+        projetId: nouveauProjet.id,
+        
+        // Données du projet
+        nom: body.nom || '',
+        prenom: body.prenom || '',
+        email: body.email || '',
+        telephone: body.telephone || '',
+        typeDeBijou: body.typeBijou || '',
+        budget: body.budget || '',
+        description: body.description || '',
+        occasion: body.occasion || '',
+        pourQui: body.pourQui || '',
+        gravure: body.gravure || '',
+        dateDeLivraison: body.dateLivraison || '',
+        photosModele: uploadedPhotosUrls,
+        
+        // Prompts pour la génération d'images
+        prompts: {
+          system: "Tu es un expert en conception de bijoux personnalisés. Génère un prompt détaillé et professionnel pour DALL-E 3 en te basant sur les informations fournies. Le prompt doit être en français, précis et inspirant, en utilisant un vocabulaire riche de joaillerie.",
+          user: `Crée un prompt pour générer une image de bijou avec ces caractéristiques :
+- Type : ${body.typeBijou || ''}
+- Budget : ${body.budget || ''}€
+- Description : ${body.description || ''}
+- Occasion : ${body.occasion || ''}
+- Pour : ${body.pourQui || ''}
+${body.gravure ? `- Gravure : ${body.gravure}` : ''}
+
+Le prompt doit décrire le bijou de manière détaillée et professionnelle pour obtenir un rendu photoréaliste de haute qualité.`,
+          
+          // Exemples de prompts fallback
+          fallbackPrompts: [
+            `${body.typeBijou || 'Bijou'} en or de haute joaillerie, ${body.description || 'design élégant'}. Design élégant et raffiné pour ${body.occasion || 'occasion spéciale'}. ${body.gravure ? `Avec gravure personnalisée "${body.gravure}". ` : ''}Vue macro professionnelle sur fond neutre, éclairage studio mettant en valeur les reflets et détails.`,
+            
+            `Magnifique ${body.typeBijou || 'bijou'} artisanal en or, ${body.description || 'création unique'}. Création unique pour ${body.pourQui || 'personne spéciale'} à l'occasion de ${body.occasion || 'moment important'}. ${body.gravure ? `Gravure élégante "${body.gravure}". ` : ''}Photographie haute définition style catalogue joaillerie.`,
+            
+            `${body.typeBijou || 'Bijou'} luxueux en or finement travaillé, ${body.description || 'pièce d\'exception'}. Pièce d'exception pour ${body.occasion || 'célébration'}. ${body.gravure ? `Personnalisé avec la gravure "${body.gravure}". ` : ''}Rendu photoréaliste avec focus sur les détails et la brillance.`,
+            
+            `Sublime ${body.typeBijou || 'bijou'} en or avec finitions soignées, ${body.description || 'bijou personnalisé'}. Bijou personnalisé pour ${body.pourQui || 'être cher'}. ${body.gravure ? `Incluant la gravure "${body.gravure}". ` : ''}Image haute résolution style vitrine de joaillier.`
+          ]
+        },
+        
+        // Métadonnées
+        timestamp: new Date().toISOString(),
+        source: 'permale-form'
+      };
+      
+      // Appel webhook n8n sans attendre la réponse
+      fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      }).catch(err => {
+        console.error('[POST /api/projets] Erreur webhook n8n:', err);
+      });
+    }
 
     return NextResponse.json(nouveauProjet, { status: 201 });
   } catch (error) {
