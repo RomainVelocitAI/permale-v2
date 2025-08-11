@@ -97,9 +97,7 @@ export default function FormulaireClient() {
         body: JSON.stringify({
           ...formData,
           gravure: veutGravure ? formData.gravure : '',
-          photosModele: photosModeleData,
-          // On ne passe plus les images générées ici, elles seront créées en arrière-plan
-          generateImages: true // Flag pour indiquer qu'on veut générer des images
+          photosModele: photosModeleData
         }),
       });
 
@@ -110,47 +108,6 @@ export default function FormulaireClient() {
 
       const data = await response.json();
       
-      // Lancer la génération d'images et attendre qu'elle soit initiée
-      if (data.id) {
-        console.log('[FormulaireClient] Lancement de la génération d\'images pour projet ID:', data.id);
-        
-        // Utiliser l'API simple qui retourne immédiatement
-        fetch('/api/generate-image-simple', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            projetId: data.id,
-            projet: formData
-          }),
-          // keepalive permet à la requête de continuer même après navigation
-          keepalive: true
-        })
-        .then(async (imageResponse) => {
-          console.log('[FormulaireClient] Réponse de generate-image-v2:', imageResponse.status);
-          
-          if (!imageResponse.ok) {
-            const errorData = await imageResponse.text();
-            console.error('[FormulaireClient] Erreur API generate-image-v2:', errorData);
-            throw new Error(`Erreur API: ${imageResponse.status}`);
-          }
-          
-          const imageData = await imageResponse.json();
-          console.log('[FormulaireClient] Images générées avec succès:', imageData);
-          
-          // Log des URLs publiques
-          if (imageData.result && imageData.result.images) {
-            imageData.result.images.forEach((img: any, index: number) => {
-              console.log(`[FormulaireClient] Image ${index + 1} URL publique:`, img.publicUrl);
-            });
-          }
-        })
-        .catch(error => {
-          console.error('[FormulaireClient] Erreur lors de la génération d\'images:', error);
-        });
-      }
-
       // Afficher la notification de succès
       setShowNotification(true);
       

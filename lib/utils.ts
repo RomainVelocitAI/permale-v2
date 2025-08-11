@@ -31,8 +31,8 @@ export function generatePresentationUrl(nom: string, prenom: string, projectId?:
   const slug = generateSlug(nom, prenom);
   const uniqueId = projectId ? projectId.slice(-8).toLowerCase() : nanoid();
   
-  // Utiliser l'URL Netlify en production
-  let baseUrl = 'https://permale.netlify.app';
+  // Utiliser l'URL Vercel en production
+  let baseUrl = 'https://permale-v2.vercel.app';
   
   // En développement local, utiliser l'URL locale
   if (process.env.NODE_ENV === 'development') {

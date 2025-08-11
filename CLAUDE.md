@@ -4,25 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Permale is a jewelry project management application built with Next.js 15 and TypeScript. It integrates with Airtable to manage client information and jewelry project details.
+Permale is a jewelry project management application built with Next.js 15 and TypeScript. It manages client jewelry projects through Airtable integration, supporting AI-generated jewelry images and client presentations.
 
 ## Development Commands
 
 ```bash
-# Start development server (on 0.0.0.0:3000)
-npm run dev
+# Development
+npm run dev          # Start development server on 0.0.0.0:3000 with Turbopack
+bash start.sh        # Alternative development start script
 
-# Or use the start script
-bash start.sh
+# Production
+npm run build        # Build for production
+npm run start        # Run production server
 
-# Build for production
-npm run build
+# Quality
+npm run lint         # Run ESLint
 
-# Run production server
-npm run start
-
-# Run linting
-npm run lint
+# Testing
+npm run create-test  # Create test record in Airtable (node create-test-record.js)
 ```
 
 ## Architecture
@@ -32,95 +31,142 @@ npm run lint
 - **TypeScript** with strict mode
 - **Tailwind CSS v4** via PostCSS
 - **Airtable** as the data backend
+- **Framer Motion** for animations
+- **OpenAI API** for image generation
+- **GitHub/Cloudinary** for image storage
 
-### Key Directories
-- `/app/api/` - API routes for Airtable operations
-- `/components/` - React components (DetailProjet, FormulaireClient, ListeProjets)
-- `/lib/airtable.ts` - Airtable integration layer
-- `/types/` - TypeScript type definitions
-
-### Data Model
-Projects in Airtable include:
-- Client info: Nom, Prenom, Email, Telephone
-- Project details: Type de bijou, Budget, Description, Occasion, Pour qui
-- Customization: A un modele (boolean), Photos modele (array), Gravure
-- Scheduling: Date de livraison
-- Media: Images (array), Image selectionnee
-- Metadata: Date de creation
+### Critical Airtable Configuration
+```
+Base Name: "Joaillerie Siva" (NOT "Permale")
+Base ID: appXBgsSjbSGjAGqA
+Table Name: "Projets"
+Table ID: tbld55N3Bmz9hKBqe
+```
 
 ### Environment Variables
 Required in `.env.local`:
-```
+```bash
+# Airtable (Required)
 AIRTABLE_API_KEY=
 AIRTABLE_BASE_ID=appXBgsSjbSGjAGqA
 AIRTABLE_TABLE_NAME=Projets
+
+# Upload Provider (Required)
+UPLOAD_PROVIDER=github  # Options: github, cloudinary, local
+
+# GitHub Provider (If UPLOAD_PROVIDER=github)
+GITHUB_TOKEN=
+GITHUB_OWNER=RomainVelocitAI
+GITHUB_REPO=permale-images
+GITHUB_BRANCH=main
+
+# OpenAI (Optional)
+OPENAI_API_KEY=
+
+# Authentication (Optional)
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
 ```
 
-**Important**: 
-- The Airtable base name is "Joaillerie Siva" (NOT "Permale")
-- The base ID is `appXBgsSjbSGjAGqA`
-- The table name is "Projets" with ID `tbld55N3Bmz9hKBqe`
+## Data Model
 
-## Key Implementation Notes
+### TypeScript Types (`/types/index.ts`)
+- **Projet**: Main jewelry project interface with 25+ fields
+- **TypeBijou**: Enum of jewelry types (Alliance, Bague de Fiançailles, etc.)
 
-1. **Server Components by Default**: All components are server components unless marked with 'use client'
+### Airtable Field Mappings
+The application maps TypeScript fields to Airtable columns with specific transformations:
+- TypeBijou categories are simplified in Airtable (e.g., all ring types → "Bague")
+- Images field expects array of `{url, filename}` objects
+- Budget is stored as number in Airtable
+- photosModele URLs are extracted from Airtable attachments
 
-2. **API Pattern**: RESTful routes in `/app/api/` handle all Airtable operations
+### AI Image Fields
+Projects support 5 AI-generated images:
+- `imageIA1` through `imageIA5`: Individual image URLs
+- `imageSelectionnee`: Currently selected/featured image
+- `urlPresentation`: Auto-generated presentation URL
 
-3. **Type Safety**: Use the `Projet` type from `/types/index.ts` for all project-related operations
+## API Routes
 
-4. **Routing**: The home page (`/`) automatically redirects to `/projets`
-
-5. **Image Handling**: Projects support multiple images with a selected image feature
-
-## Common Tasks
-
-### Adding New API Endpoints
-Create new route handlers in `/app/api/` following the Next.js App Router conventions.
-
-### Modifying the Data Model
-1. Update the TypeScript types in `/types/`
-2. Adjust the Airtable field mappings in API routes
-3. Update components to handle new fields
-
-### Working with Airtable
-The `/lib/airtable.ts` file provides the base configuration. All Airtable operations should go through the API routes for proper error handling and data transformation.
-
-## Current Implementation Status
-
-### Incomplete Features (TODOs in code)
-- Several Airtable field mappings are commented out in `/lib/airtable.ts`
-- Image generation API integration is pending
-- TypeBijou select field needs proper Airtable mapping
-- Some project fields not fully implemented (photosModele, etc.)
-
-### API Routes Pattern
-- GET `/api/projets` - Fetch all projects
-- GET `/api/projets?id={id}` - Fetch specific project
-- POST `/api/projets` - Create new project
-- PUT `/api/projets` - Update project (mainly for images)
-
-### TypeScript Types
-The main `Projet` interface includes all jewelry project fields. The `TypeBijou` enum defines all jewelry types (Alliance, Bague de Fiançailles, Chevalière, etc.).
+| Route | Method | Purpose |
+|-------|---------|---------|
+| `/api/projets` | GET | Fetch all projects (sorted by date) |
+| `/api/projets?id={id}` | GET | Fetch specific project |
+| `/api/projets` | POST | Create new project |
+| `/api/projets` | PUT | Update project (images, selection) |
+| `/api/projets/presentation` | GET | Fetch project for public presentation |
+| `/api/generate-image` | POST | Generate AI jewelry images |
+| `/api/auth/login` | POST | Admin authentication |
+| `/api/auth/logout` | POST | Admin logout |
 
 ## Image Upload System
 
-### Architecture
-- Modular upload service with provider pattern (`/lib/upload-service.ts`)
-- Supports multiple providers: local (dev), GitHub, Cloudinary
-- Images are converted to base64 on the client before upload
-- Provider uploads images and returns URLs for Airtable
+### Provider Pattern (`/lib/upload-service.ts`)
+The system uses a modular provider pattern supporting:
+- **LocalProvider**: Data URLs for development
+- **GitHubProvider**: GitHub repository storage (production)
+- **CloudinaryProvider**: Cloudinary CDN (alternative)
 
-### GitHub Provider Setup
-1. Create GitHub Personal Access Token with 'repo' scope
-2. Configure environment variables:
-   ```
-   UPLOAD_PROVIDER=github
-   GITHUB_TOKEN=your_token
-   GITHUB_OWNER=RomainVelocitAI
-   GITHUB_REPO=permale-images
-   ```
-3. Images are stored in: `https://github.com/RomainVelocitAI/permale-images`
+### GitHub Image Storage
+Images are organized in: `projets/{year}/{month}/{timestamp}-{random}-{filename}`
 
-### Local Development
-By default, uses LocalProvider which returns data URLs. For production, switch to GitHub or Cloudinary provider.
+Upload flow:
+1. Client converts image to base64
+2. Server receives base64 string
+3. Provider uploads to GitHub/Cloudinary
+4. Returns public URL for Airtable storage
+
+### Image Generation
+- Uses OpenAI DALL-E integration (`/lib/gpt-image-jewelry-service.ts`)
+- Generates jewelry prompts based on project details
+- Supports batch generation of multiple variations
+
+## Key Implementation Details
+
+### Airtable Integration (`/lib/airtable.ts`)
+- Lazy initialization pattern for Airtable client
+- Automatic URL presentation generation on project creation
+- Field mapping with type conversions and defaults
+- Photo extraction from Airtable attachment fields
+
+### URL Presentation System
+Projects get automatic presentation URLs:
+- Format: `/presentation/{nom}-{prenom}-{recordId}`
+- Generated on project creation
+- Stored in `URL Presentation` field
+
+### TypeScript Configuration
+- Target: ES2017
+- Module: ESNext with bundler resolution
+- Strict mode enabled
+- Path alias: `@/*` maps to root
+
+## Known Issues & TODOs
+
+### Field Mapping Limitations
+- TypeBijou mapping is simplified (loses specific type detail)
+- aUnModele is calculated from photosModele presence
+- Some fields return default values when not properly mapped
+
+### Pending Features
+- Complete OpenAI image generation integration
+- Full TypeBijou bidirectional mapping
+- Cloudinary provider implementation
+- Test coverage for API routes
+
+## Deployment
+
+### Netlify Configuration
+The project includes `netlify.toml` with:
+- Next.js plugin configuration
+- Security headers
+- Optimized caching for assets
+- Standalone output mode
+
+### Production Checklist
+1. Set all required environment variables
+2. Configure upload provider (GitHub recommended)
+3. Verify Airtable base/table IDs
+4. Test image upload functionality
+5. Validate presentation URLs

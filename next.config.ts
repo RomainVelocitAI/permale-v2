@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Retirer output: 'standalone' pour Vercel
   images: {
     remotePatterns: [
       {
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Optimizations pour Netlify
+  // Optimizations pour Vercel
   compress: true,
   poweredByHeader: false,
 };

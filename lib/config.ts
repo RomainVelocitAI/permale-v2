@@ -1,14 +1,14 @@
 // Configuration centralisée pour l'application
 
 export const getBaseUrl = () => {
-  // En production (Netlify), utiliser l'URL de production
+  // En production (Vercel), utiliser l'URL de production
   if (process.env.NODE_ENV === 'production') {
-    return 'https://permale.netlify.app';
+    return 'https://permale-v2.vercel.app';
   }
   
-  // Pour Netlify Deploy Preview et Branch deploys
-  if (process.env.DEPLOY_URL) {
-    return process.env.DEPLOY_URL;
+  // Pour Vercel Preview deployments
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
   }
   
   // En développement local
