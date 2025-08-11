@@ -416,7 +416,7 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         imageIndex={selectedImageIndex}
-        projetId={projet.id}
+        projetId={projet.id || ''}
         projetData={{
           nom: projet.nom,
           prenom: projet.prenom,
