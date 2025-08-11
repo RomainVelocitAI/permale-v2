@@ -137,11 +137,11 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
       imageSelectionnee: record.get('Image selectionnee') as string || '',
-      imageIA1: record.get('imageIA1') as string || '',
-      imageIA2: record.get('imageIA2') as string || '',
-      imageIA3: record.get('imageIA3') as string || '',
-      imageIA4: record.get('imageIA4') as string || '',
-      imageIA5: record.get('imageIA5') as string || '',
+      imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
+      imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
+      imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
+      imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
+      imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
       urlPresentation: urlPresentation, // Utiliser l'URL générée
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };
@@ -215,11 +215,11 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
       imageSelectionnee: record.get('Image selectionnee') as string || '',
-      imageIA1: record.get('imageIA1') as string || '',
-      imageIA2: record.get('imageIA2') as string || '',
-      imageIA3: record.get('imageIA3') as string || '',
-      imageIA4: record.get('imageIA4') as string || '',
-      imageIA5: record.get('imageIA5') as string || '',
+      imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
+      imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
+      imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
+      imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
+      imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
       urlPresentation: record.get('URL Presentation') as string || '',
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };
@@ -265,11 +265,11 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
       imageSelectionnee: record.get('Image selectionnee') as string || '',
-      imageIA1: record.get('imageIA1') as string || '',
-      imageIA2: record.get('imageIA2') as string || '',
-      imageIA3: record.get('imageIA3') as string || '',
-      imageIA4: record.get('imageIA4') as string || '',
-      imageIA5: record.get('imageIA5') as string || '',
+      imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
+      imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
+      imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
+      imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
+      imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
       urlPresentation: record.get('URL Presentation') as string || '',
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };

@@ -20,8 +20,10 @@ npm run start        # Run production server
 # Quality
 npm run lint         # Run ESLint
 
-# Testing
+# Testing & Utilities
 npm run create-test  # Create test record in Airtable (node create-test-record.js)
+node create-airtable-fields.js  # Check/verify Airtable field configuration
+node create-fields-metadata.js  # Generate field metadata for Airtable
 ```
 
 ## Architecture
@@ -157,6 +159,13 @@ Projects get automatic presentation URLs:
 
 ## Deployment
 
+### Vercel Configuration
+The project includes `vercel.json` with:
+- Next.js framework configuration
+- CDG1 (Paris) region deployment
+- Security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
+- Static asset caching optimization
+
 ### Netlify Configuration
 The project includes `netlify.toml` with:
 - Next.js plugin configuration
@@ -170,3 +179,16 @@ The project includes `netlify.toml` with:
 3. Verify Airtable base/table IDs
 4. Test image upload functionality
 5. Validate presentation URLs
+
+## Project-Specific Notes
+
+### No Test Framework
+This project currently has no test framework configured. Tests are limited to:
+- Manual testing via `npm run create-test` for Airtable integration
+- Airtable field verification utilities
+
+### Critical Files
+- `/lib/airtable.ts`: Core Airtable integration - handles all database operations
+- `/lib/upload-service.ts`: Image upload abstraction layer
+- `/app/api/projets/route.ts`: Main API endpoint for CRUD operations
+- `/types/index.ts`: TypeScript interfaces defining the data model

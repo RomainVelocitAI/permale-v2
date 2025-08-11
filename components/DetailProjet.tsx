@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Projet } from '@/types';
 import Image from 'next/image';
 import LuxuryImageGrid from './LuxuryImageGrid';
+import ModalModificationImage from './ModalModificationImage';
 
 interface DetailProjetProps {
   projet: Projet;
@@ -17,6 +18,8 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
   const [checkingImages, setCheckingImages] = useState(false);
   const [localGeneratedImages, setLocalGeneratedImages] = useState<string[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 
   // Récupérer les images depuis les champs imageIA1-4
   const imagesIA = [
@@ -110,8 +113,8 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   };
 
   const handleEditImage = (imageIndex: number) => {
-    // Flux Kontext integration for image editing will be implemented
-    alert(`Édition de l'image ${imageIndex + 1} - Fonctionnalité à venir`);
+    setSelectedImageIndex(imageIndex);
+    setModalOpen(true);
   };
 
   return (
@@ -407,6 +410,20 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
           </p>
         </div>
       </div>
+      
+      {/* Modal de modification */}
+      <ModalModificationImage
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        imageIndex={selectedImageIndex}
+        projetId={projet.id}
+        projetData={{
+          nom: projet.nom,
+          prenom: projet.prenom,
+          typeBijou: projet.typeBijou,
+          description: projet.description
+        }}
+      />
     </div>
   );
 }
