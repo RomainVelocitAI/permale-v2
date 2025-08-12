@@ -49,7 +49,7 @@ export default function ModalModificationImage({
     setSending(true);
 
     try {
-      const response = await fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/15858794-d642-449a-9fba-5f8616fe7ba9', {
+      const response = await fetch('/api/modification-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
