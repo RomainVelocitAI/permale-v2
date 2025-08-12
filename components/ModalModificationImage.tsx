@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModalModificationImageProps {
@@ -25,6 +25,14 @@ export default function ModalModificationImage({
 }: ModalModificationImageProps) {
   const [modification, setModification] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Réinitialiser le champ de modification quand le modal s'ouvre ou quand l'image change
+  useEffect(() => {
+    if (isOpen) {
+      setModification('');
+      setSending(false);
+    }
+  }, [isOpen, imageIndex]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
