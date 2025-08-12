@@ -5,6 +5,7 @@ import { Projet } from '@/types';
 import Image from 'next/image';
 import LuxuryImageGrid from './LuxuryImageGrid';
 import ModalModificationImage from './ModalModificationImage';
+import ImageLightbox from './ImageLightbox';
 
 interface DetailProjetProps {
   projet: Projet;
@@ -20,6 +21,8 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   const [localGeneratedImages, setLocalGeneratedImages] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImageIndex, setLightboxImageIndex] = useState<number>(0);
 
   // Récupérer les images depuis les champs imageIA1-4
   const imagesIA = [
@@ -115,6 +118,11 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   const handleEditImage = (imageIndex: number) => {
     setSelectedImageIndex(imageIndex);
     setModalOpen(true);
+  };
+
+  const handleOpenLightbox = (imageIndex: number) => {
+    setLightboxImageIndex(imageIndex);
+    setLightboxOpen(true);
   };
 
   return (
@@ -335,15 +343,29 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
                 {generatedImages.map((image, index) => (
                   <div key={index} className="group">
-                    <div className="aspect-square bg-[#efefef] border-2 border-[#acae9f] overflow-hidden transition-all duration-300 group-hover:border-[#363d43]">
+                    <div 
+                      className="aspect-square bg-[#efefef] border-2 border-[#acae9f] overflow-hidden transition-all duration-300 group-hover:border-[#363d43] cursor-pointer"
+                      onClick={() => handleOpenLightbox(index)}
+                    >
                       <div className="relative w-full h-full">
                         <Image
                           src={image}
                           alt={`Création ${index + 1}`}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                         />
+                        {/* Overlay avec icône de zoom au hover */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                          <svg 
+                            className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                     
@@ -423,6 +445,14 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
           typeBijou: projet.typeBijou,
           description: projet.description
         }}
+      />
+      
+      {/* Lightbox pour afficher les images en grand */}
+      <ImageLightbox
+        images={generatedImages}
+        initialIndex={lightboxImageIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
       />
     </div>
   );
