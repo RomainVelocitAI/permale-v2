@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     // Envoyer la requête vers le webhook n8n depuis le serveur (pas de CORS)
     console.log('[API /modification-image] Sending to n8n webhook...');
     
-    const response = await fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/15858794-d642-449a-9fba-5f8616fe7ba9', {
+    const response = await fetch('https://n8n.srv765302.hstgr.cloud/webhook/15858794-d642-449a-9fba-5f8616fe7ba9', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
