@@ -436,7 +436,10 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
       {/* Modal de modification */}
       <ModalModificationImage
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedImageIndex(0);  // Réinitialiser l'index lors de la fermeture
+        }}
         imageIndex={selectedImageIndex}
         projetId={projet.id || ''}
         projetData={{

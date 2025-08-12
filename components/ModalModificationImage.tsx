@@ -28,14 +28,18 @@ export default function ModalModificationImage({
 
   // Réinitialiser le champ de modification quand le modal s'ouvre ou quand l'image change
   useEffect(() => {
+    console.log('Modal state change - isOpen:', isOpen, 'imageIndex:', imageIndex);
     if (isOpen) {
       setModification('');
       setSending(false);
+      console.log('Modal reset - cleared modification text');
     }
   }, [isOpen, imageIndex]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('Form submission - modification:', modification, 'imageIndex:', imageIndex, 'projetId:', projetId);
     
     if (!modification.trim()) {
       alert('Veuillez décrire les modifications souhaitées');
@@ -68,6 +72,7 @@ export default function ModalModificationImage({
       if (response.ok) {
         alert(`Demande de modification pour l'image ${imageIndex + 1} envoyée avec succès`);
         setModification('');
+        setSending(false);
         onClose();
       } else {
         throw new Error('Erreur lors de l\'envoi');
