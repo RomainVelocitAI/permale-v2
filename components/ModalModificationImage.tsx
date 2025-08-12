@@ -70,12 +70,16 @@ export default function ModalModificationImage({
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Response from API:', result);
         alert(`Demande de modification pour l'image ${imageIndex + 1} envoyée avec succès`);
         setModification('');
         setSending(false);
         onClose();
       } else {
-        throw new Error('Erreur lors de l\'envoi');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.details || 'Erreur lors de l\'envoi');
       }
     } catch (error) {
       console.error('Erreur:', error);
