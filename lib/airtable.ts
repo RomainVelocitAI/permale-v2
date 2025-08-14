@@ -136,7 +136,7 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || record.get('Image selectionnee') as string || '',
+      imageSelectionnee: record.get('Image choisie') as string || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
@@ -180,7 +180,7 @@ export async function getAllProjets(): Promise<Projet[]> {
         dateLivraison: record.get('Date de livraison') as string || '',
         gravure: record.get('Gravure') as string || '',
         images: [], // Reserved for AI-generated images
-        imageSelectionnee: record.get('Image choisie') as string || record.get('Image selectionnee') as string || '',
+        imageSelectionnee: record.get('Image choisie') as string || '',
         imageIA1: record.get('imageIA1') as string || '',
         imageIA2: record.get('imageIA2') as string || '',
         imageIA3: record.get('imageIA3') as string || '',
@@ -222,7 +222,7 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || record.get('Image selectionnee') as string || '',
+      imageSelectionnee: record.get('Image choisie') as string || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
@@ -276,7 +276,7 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || record.get('Image selectionnee') as string || '',
+      imageSelectionnee: record.get('Image choisie') as string || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
