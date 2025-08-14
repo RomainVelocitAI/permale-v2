@@ -23,6 +23,7 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number>(0);
+  const [showPresentationNotification, setShowPresentationNotification] = useState(false);
 
   // Récupérer les images depuis les champs imageIA1-4
   const imagesIA = [
@@ -127,6 +128,11 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
         console.error('Erreur lors du déclenchement de la génération des images de présentation');
       } else {
         console.log('Génération des images de présentation déclenchée avec succès');
+        // Afficher la notification de présentation
+        setShowPresentationNotification(true);
+        setTimeout(() => {
+          setShowPresentationNotification(false);
+        }, 5000);
       }
     } catch (error) {
       alert('Erreur lors de la sauvegarde de la sélection');
@@ -441,16 +447,6 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
                 >
                   {saving ? 'Validation en cours...' : 'Valider la sélection'}
                 </button>
-                {imageSelectionnee === imageTemporaire && (
-                  <div className="mt-4 inline-flex items-center gap-3 px-6 py-4 bg-[#acae9f] bg-opacity-10 border border-[#acae9f]">
-                    <svg className="w-5 h-5 text-[#acae9f]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-[#363d43] text-sm tracking-[0.1em] uppercase" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
-                      Sélection enregistrée
-                    </p>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -491,6 +487,76 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
       />
+
+      {/* Notification de présentation en cours */}
+      {showPresentationNotification && (
+        <div className="fixed top-8 right-8 z-50 animate-slide-in-right">
+          <div className="bg-white shadow-2xl border border-[#acae9f] p-6 max-w-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-[#acae9f]/10 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#acae9f] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-[#363d43] tracking-[0.15em] uppercase mb-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+                  Présentation en préparation
+                </h3>
+                <p className="text-xs text-[#363d43]/70 leading-relaxed" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+                  Votre présentation exclusive sera disponible dans quelques instants. 
+                  4 visuels personnalisés sont en cours de création.
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="h-1 bg-[#acae9f]/20 flex-1 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#acae9f] animate-progress-bar rounded-full"></div>
+                  </div>
+                  <span className="text-xs text-[#acae9f]" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>30s</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPresentationNotification(false)}
+                className="flex-shrink-0 text-[#363d43]/40 hover:text-[#363d43] transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-in-right {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes progress-bar {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+        
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out;
+        }
+        
+        .animate-progress-bar {
+          animation: progress-bar 5s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
