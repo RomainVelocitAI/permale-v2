@@ -142,6 +142,10 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
       imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
       imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
+      imagePres1: extractPhotosUrls(record.get('ImagePres1'))[0] || '',
+      imagePres2: extractPhotosUrls(record.get('ImagePres2'))[0] || '',
+      imagePres3: extractPhotosUrls(record.get('ImagePres3'))[0] || '',
+      imagePres4: extractPhotosUrls(record.get('ImagePres4'))[0] || '',
       urlPresentation: urlPresentation, // Utiliser l'URL générée
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };
@@ -182,6 +186,10 @@ export async function getAllProjets(): Promise<Projet[]> {
         imageIA3: record.get('imageIA3') as string || '',
         imageIA4: record.get('imageIA4') as string || '',
         imageIA5: record.get('imageIA5') as string || '',
+        imagePres1: extractPhotosUrls(record.get('ImagePres1'))[0] || '',
+        imagePres2: extractPhotosUrls(record.get('ImagePres2'))[0] || '',
+        imagePres3: extractPhotosUrls(record.get('ImagePres3'))[0] || '',
+        imagePres4: extractPhotosUrls(record.get('ImagePres4'))[0] || '',
         urlPresentation: record.get('URL Presentation') as string || '',
         dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
       };
@@ -220,6 +228,10 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
       imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
       imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
+      imagePres1: extractPhotosUrls(record.get('ImagePres1'))[0] || '',
+      imagePres2: extractPhotosUrls(record.get('ImagePres2'))[0] || '',
+      imagePres3: extractPhotosUrls(record.get('ImagePres3'))[0] || '',
+      imagePres4: extractPhotosUrls(record.get('ImagePres4'))[0] || '',
       urlPresentation: record.get('URL Presentation') as string || '',
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };
@@ -270,6 +282,10 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
       imageIA4: extractPhotosUrls(record.get('imageIA4'))[0] || '',
       imageIA5: extractPhotosUrls(record.get('imageIA5'))[0] || '',
+      imagePres1: extractPhotosUrls(record.get('ImagePres1'))[0] || '',
+      imagePres2: extractPhotosUrls(record.get('ImagePres2'))[0] || '',
+      imagePres3: extractPhotosUrls(record.get('ImagePres3'))[0] || '',
+      imagePres4: extractPhotosUrls(record.get('ImagePres4'))[0] || '',
       urlPresentation: record.get('URL Presentation') as string || '',
       dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
     };

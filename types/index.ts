@@ -20,6 +20,10 @@ export interface Projet {
   imageIA3?: string;
   imageIA4?: string;
   imageIA5?: string;
+  imagePres1?: string;
+  imagePres2?: string;
+  imagePres3?: string;
+  imagePres4?: string;
   urlPresentation?: string;
   dateCreation?: string;
 }
