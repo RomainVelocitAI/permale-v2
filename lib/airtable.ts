@@ -97,7 +97,9 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       
       // Set the first image as selected by default
       if (!projet.imageSelectionnee && projet.images[0]) {
-        fields['Image selectionnee'] = projet.images[0];
+        fields['Image choisie'] = [{
+          url: projet.images[0]
+        }];
       }
     }
     
@@ -136,7 +138,7 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || '',
+      imageSelectionnee: extractPhotosUrls(record.get('Image choisie'))[0] || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
@@ -180,7 +182,7 @@ export async function getAllProjets(): Promise<Projet[]> {
         dateLivraison: record.get('Date de livraison') as string || '',
         gravure: record.get('Gravure') as string || '',
         images: [], // Reserved for AI-generated images
-        imageSelectionnee: record.get('Image choisie') as string || '',
+        imageSelectionnee: extractPhotosUrls(record.get('Image choisie'))[0] || '',
         imageIA1: record.get('imageIA1') as string || '',
         imageIA2: record.get('imageIA2') as string || '',
         imageIA3: record.get('imageIA3') as string || '',
@@ -222,7 +224,7 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || '',
+      imageSelectionnee: extractPhotosUrls(record.get('Image choisie'))[0] || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
@@ -246,7 +248,11 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
     const fieldsToUpdate: any = {};
     
     if (updates.images) fieldsToUpdate['Images'] = updates.images;
-    if (updates.imageSelectionnee) fieldsToUpdate['Image selectionnee'] = updates.imageSelectionnee;
+    if (updates.imageSelectionnee) {
+      fieldsToUpdate['Image choisie'] = [{
+        url: updates.imageSelectionnee
+      }];
+    }
     if (updates.imageIA1) fieldsToUpdate['imageIA1'] = updates.imageIA1;
     if (updates.imageIA2) fieldsToUpdate['imageIA2'] = updates.imageIA2;
     if (updates.imageIA3) fieldsToUpdate['imageIA3'] = updates.imageIA3;
@@ -276,7 +282,7 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       dateLivraison: record.get('Date de livraison') as string || '',
       gravure: record.get('Gravure') as string || '',
       images: [], // Reserved for AI-generated images
-      imageSelectionnee: record.get('Image choisie') as string || '',
+      imageSelectionnee: extractPhotosUrls(record.get('Image choisie'))[0] || '',
       imageIA1: extractPhotosUrls(record.get('imageIA1'))[0] || '',
       imageIA2: extractPhotosUrls(record.get('imageIA2'))[0] || '',
       imageIA3: extractPhotosUrls(record.get('imageIA3'))[0] || '',
