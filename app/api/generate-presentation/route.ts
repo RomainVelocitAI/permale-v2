@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // URL du webhook n8n pour la génération des images de présentation
     const webhookUrl = process.env.N8N_WEBHOOK_PRESENTATION || 
-      'https://n8n.srv765302.hstgr.cloud/webhook-test/permale-presentation-images';
+      'https://n8n.srv765302.hstgr.cloud/webhook-test/d95d6fdf-5edc-4803-b8f4-4874161e2fee';
 
     console.log('[Generate Presentation] Envoi webhook n8n:', webhookUrl);
     console.log('[Generate Presentation] Données:', JSON.stringify(webhookData, null, 2));
