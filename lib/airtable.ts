@@ -53,21 +53,10 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
     if (projet.email) fields['Email'] = projet.email;
     if (projet.telephone) fields['Telephone'] = projet.telephone;
     
-    // Map TypeBijou to Airtable's simplified categories
+    // Map TypeBijou to Airtable - Keeping exact values without mapping
     if (projet.typeBijou) {
-      const typeBijouMapping: Record<string, string> = {
-        'Alliance': 'Bague',
-        'Bague de Fiançailles': 'Bague',
-        'Chevalière': 'Bague',
-        'Bague autre': 'Bague',
-        'Collier': 'Collier',
-        'Pendentif': 'Collier',
-        'Boucle d\'oreille': 'Boucles d\'oreilles',
-        'Bracelet': 'Bracelet',
-        'Percing': 'Autre',
-        'Bijoux autre': 'Autre'
-      };
-      fields['Type de bijou'] = typeBijouMapping[projet.typeBijou] || 'Autre';
+      // On garde la valeur exacte du formulaire dans Airtable
+      fields['Type de bijou'] = projet.typeBijou;
     }
     
     if (projet.description) fields['Description'] = projet.description;
@@ -78,6 +67,11 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
     if (projet.budget) fields['Budget'] = parseFloat(projet.budget);
     if (projet.dateLivraison) fields['Date de livraison'] = projet.dateLivraison;
     if (projet.gravure) fields['Gravure'] = projet.gravure;
+    
+    // Ajouter le champ "A un modèle" pour indiquer si des photos ont été fournies
+    if (typeof projet.aUnModele === 'boolean') {
+      fields['A un modèle'] = projet.aUnModele;
+    }
     
     // Handle uploaded photos - Airtable expects an array of objects with url
     if (projet.photosModele && projet.photosModele.length > 0) {
@@ -128,9 +122,9 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: projet.typeBijou || 'Alliance' as TypeBijou, // Keep original value since Airtable has different categories
+      typeBijou: (record.get('Type de bijou') as TypeBijou) || projet.typeBijou || 'Alliance',
       description: record.get('Description') as string || '',
-      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
       occasion: record.get('Occasion') as string || '',
       pourQui: record.get('Pour qui') as string || '',
@@ -172,9 +166,9 @@ export async function getAllProjets(): Promise<Projet[]> {
         prenom: record.get('Prenom') as string || '',
         email: record.get('Email') as string || '',
         telephone: record.get('Telephone') as string || '',
-        typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+        typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
         description: record.get('Description') as string || '',
-        aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+        aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
         photosModele: photosUrls,
         occasion: record.get('Occasion') as string || '',
         pourQui: record.get('Pour qui') as string || '',
@@ -214,9 +208,9 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+      typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
       description: record.get('Description') as string || '',
-      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
       occasion: record.get('Occasion') as string || '',
       pourQui: record.get('Pour qui') as string || '',
@@ -272,9 +266,9 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: 'Alliance' as TypeBijou, // Default value - actual jewelry type is stored differently in Airtable
+      typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
       description: record.get('Description') as string || '',
-      aUnModele: photosUrls.length > 0, // Automatically calculated based on photos
+      aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
       occasion: record.get('Occasion') as string || '',
       pourQui: record.get('Pour qui') as string || '',
