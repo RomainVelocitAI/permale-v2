@@ -93,6 +93,7 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
     setImageSelectionnee(imageTemporaire);
 
     try {
+      // Sauvegarder la sélection
       const response = await fetch('/api/projets', {
         method: 'PUT',
         headers: {
@@ -106,6 +107,26 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
 
       if (!response.ok) {
         throw new Error('Erreur lors de la sauvegarde');
+      }
+
+      // Déclencher la génération des 4 images de présentation
+      const presentationResponse = await fetch('/api/generate-presentation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projetId: projet.id,
+          imageSelectionnee: imageTemporaire,
+          typeBijou: projet.typeBijou,
+          description: projet.description,
+        }),
+      });
+
+      if (!presentationResponse.ok) {
+        console.error('Erreur lors du déclenchement de la génération des images de présentation');
+      } else {
+        console.log('Génération des images de présentation déclenchée avec succès');
       }
     } catch (error) {
       alert('Erreur lors de la sauvegarde de la sélection');
