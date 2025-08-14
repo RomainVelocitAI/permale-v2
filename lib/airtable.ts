@@ -56,7 +56,7 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
     // Map TypeBijou to Airtable - Keeping exact values without mapping
     if (projet.typeBijou) {
       // On garde la valeur exacte du formulaire dans Airtable
-      fields['Type de bijou'] = projet.typeBijou;
+      fields['Type de bijou (nouveau)'] = projet.typeBijou;
     }
     
     if (projet.description) fields['Description'] = projet.description;
@@ -122,7 +122,7 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: (record.get('Type de bijou') as TypeBijou) || projet.typeBijou || 'Alliance',
+      typeBijou: (record.get('Type de bijou (nouveau)') as TypeBijou) || projet.typeBijou || 'Alliance',
       description: record.get('Description') as string || '',
       aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
@@ -166,7 +166,7 @@ export async function getAllProjets(): Promise<Projet[]> {
         prenom: record.get('Prenom') as string || '',
         email: record.get('Email') as string || '',
         telephone: record.get('Telephone') as string || '',
-        typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
+        typeBijou: (record.get('Type de bijou (nouveau)') as TypeBijou) || 'Alliance',
         description: record.get('Description') as string || '',
         aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
         photosModele: photosUrls,
@@ -208,7 +208,7 @@ export async function getProjetById(id: string): Promise<Projet | null> {
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
+      typeBijou: (record.get('Type de bijou (nouveau)') as TypeBijou) || 'Alliance',
       description: record.get('Description') as string || '',
       aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
@@ -266,7 +266,7 @@ export async function updateProjet(id: string, updates: Partial<Projet>): Promis
       prenom: record.get('Prenom') as string || '',
       email: record.get('Email') as string || '',
       telephone: record.get('Telephone') as string || '',
-      typeBijou: (record.get('Type de bijou') as TypeBijou) || 'Alliance',
+      typeBijou: (record.get('Type de bijou (nouveau)') as TypeBijou) || 'Alliance',
       description: record.get('Description') as string || '',
       aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
       photosModele: photosUrls,
