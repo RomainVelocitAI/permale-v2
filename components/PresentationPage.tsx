@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoPermale from '@/public/soloo fin blc.png';
 import { getTextsForJewelryType } from '@/lib/presentation-texts';
+import ImagePopup from '@/components/ImagePopup';
 
 interface PresentationPageProps {
   projet: Projet;
@@ -14,6 +15,7 @@ interface PresentationPageProps {
 export default function PresentationPage({ projet }: PresentationPageProps) {
   const [currentSection, setCurrentSection] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [popupImage, setPopupImage] = useState<{src: string, title: string} | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const sections = [
@@ -82,7 +84,7 @@ export default function PresentationPage({ projet }: PresentationPageProps) {
       <AnimatePresence mode="wait">
         {currentSection === 0 && <IntroSection projet={projet} key="intro" />}
         {currentSection === 1 && <UniversSection key="univers" />}
-        {currentSection === 2 && <DemandeSection projet={projet} key="demande" />}
+        {currentSection === 2 && <DemandeSection projet={projet} setPopupImage={setPopupImage} key="demande" />}
         {currentSection === 3 && <EssenceSection projet={projet} key="essence" />}
         {currentSection === 4 && <PorteSection projet={projet} key="porte" />}
         {currentSection === 5 && <EcrinSection projet={projet} key="ecrin" />}
@@ -145,6 +147,16 @@ export default function PresentationPage({ projet }: PresentationPageProps) {
           </svg>
         )}
       </button>
+      
+      {/* Popup Image pour Votre Vision */}
+      {popupImage && (
+        <ImagePopup
+          isOpen={!!popupImage}
+          onClose={() => setPopupImage(null)}
+          imageSrc={popupImage.src}
+          title={popupImage.title}
+        />
+      )}
     </div>
   );
 }
@@ -245,7 +257,7 @@ function UniversSection() {
 }
 
 // Section 2 - Demande du client avec image sélectionnée
-function DemandeSection({ projet }: { projet: Projet }) {
+function DemandeSection({ projet, setPopupImage }: { projet: Projet; setPopupImage: (img: {src: string, title: string} | null) => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -302,15 +314,19 @@ function DemandeSection({ projet }: { projet: Projet }) {
             </div>
           </motion.div>
           
-          {projet.imageSelectionnee && (
+          {(projet.imageSelectionnee || projet.imageIA1 || projet.imageIA2 || projet.imageIA3 || projet.imageIA4) && (
             <motion.div
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 1.2, duration: 1 }}
-              className="relative aspect-square overflow-hidden rounded-lg"
+              className="relative aspect-square overflow-hidden rounded-lg cursor-pointer hover:ring-2 hover:ring-[#acae9f] transition-all"
+              onClick={() => {
+                const image = projet.imageSelectionnee || projet.imageIA1 || projet.imageIA2 || projet.imageIA3 || projet.imageIA4;
+                if (image) setPopupImage({src: image, title: 'Votre Vision'});
+              }}
             >
               <Image
-                src={projet.imageSelectionnee}
+                src={projet.imageSelectionnee || projet.imageIA1 || projet.imageIA2 || projet.imageIA3 || projet.imageIA4 || ''}
                 alt="Vision du bijou"
                 fill
                 className="object-cover"
@@ -324,215 +340,307 @@ function DemandeSection({ projet }: { projet: Projet }) {
 }
 
 
-// Section 3 - L'Essence du Bijou (Photo couchée)
+// Section 3 - L'Essence du Bijou (Photo couchée) - Image à gauche
 function EssenceSection({ projet }: { projet: Projet }) {
   const texts = getTextsForJewelryType(projet.typeBijou);
+  const [showPopup, setShowPopup] = useState(false);
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
-    >
-      <div className="max-w-5xl mx-auto px-8 w-full">
-        <motion.h2
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
-          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
-        >
-          L'ESSENCE DU BIJOU
-        </motion.h2>
-        
-        {projet.imagePres1 && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="relative aspect-[16/9] overflow-hidden rounded-lg mb-8"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+      >
+        <div className="max-w-6xl mx-auto px-8 w-full">
+          <motion.h2
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-4xl font-light tracking-[0.3em] mb-12 text-center"
+            style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
           >
-            <Image
-              src={projet.imagePres1}
-              alt="Essence du bijou"
-              fill
-              className="object-cover"
-            />
-          </motion.div>
-        )}
-        
-        <motion.p
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="text-xl text-center font-light leading-relaxed italic"
-          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
-        >
-          {texts.slide1}
-        </motion.p>
-      </div>
-    </motion.div>
+            L'ESSENCE DU BIJOU
+          </motion.h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {projet.imagePres1 && (
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg cursor-pointer hover:ring-2 hover:ring-[#acae9f] transition-all"
+                onClick={() => setShowPopup(true)}
+              >
+                <Image
+                  src={projet.imagePres1}
+                  alt="Essence du bijou"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+            
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+              className="space-y-6"
+            >
+              <p className="text-xl font-light leading-relaxed italic"
+                style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+              >
+                {texts.slide1}
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+      
+      {projet.imagePres1 && (
+        <ImagePopup
+          isOpen={showPopup}
+          onClose={() => setShowPopup(false)}
+          imageSrc={projet.imagePres1}
+          title="L'Essence du Bijou"
+        />
+      )}
+    </>
   );
 }
 
-// Section 4 - Porté avec Élégance (Bijou porté)
+// Section 4 - Porté avec Élégance (Bijou porté) - Image à droite
 function PorteSection({ projet }: { projet: Projet }) {
   const texts = getTextsForJewelryType(projet.typeBijou);
+  const [showPopup, setShowPopup] = useState(false);
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
-    >
-      <div className="max-w-5xl mx-auto px-8 w-full">
-        <motion.h2
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
-          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
-        >
-          PORTÉ AVEC ÉLÉGANCE
-        </motion.h2>
-        
-        {projet.imagePres2 && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="relative aspect-[4/3] overflow-hidden rounded-lg mb-8 max-w-3xl mx-auto"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+      >
+        <div className="max-w-6xl mx-auto px-8 w-full">
+          <motion.h2
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-4xl font-light tracking-[0.3em] mb-12 text-center"
+            style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
           >
-            <Image
-              src={projet.imagePres2}
-              alt="Bijou porté"
-              fill
-              className="object-cover"
-            />
-          </motion.div>
-        )}
-        
-        <motion.p
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="text-xl text-center font-light leading-relaxed italic"
-          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
-        >
-          {texts.slide2}
-        </motion.p>
-      </div>
-    </motion.div>
+            PORTÉ AVEC ÉLÉGANCE
+          </motion.h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+              className="space-y-6 order-2 md:order-1"
+            >
+              <p className="text-xl font-light leading-relaxed italic"
+                style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+              >
+                {texts.slide2}
+              </p>
+            </motion.div>
+            
+            {projet.imagePres2 && (
+              <motion.div
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg cursor-pointer hover:ring-2 hover:ring-[#acae9f] transition-all order-1 md:order-2"
+                onClick={() => setShowPopup(true)}
+              >
+                <Image
+                  src={projet.imagePres2}
+                  alt="Bijou porté"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+      
+      {projet.imagePres2 && (
+        <ImagePopup
+          isOpen={showPopup}
+          onClose={() => setShowPopup(false)}
+          imageSrc={projet.imagePres2}
+          title="Porté avec Élégance"
+        />
+      )}
+    </>
   );
 }
 
-// Section 5 - Dans son Écrin
+// Section 5 - Dans son Écrin - Image à gauche
 function EcrinSection({ projet }: { projet: Projet }) {
   const texts = getTextsForJewelryType(projet.typeBijou);
+  const [showPopup, setShowPopup] = useState(false);
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
-    >
-      <div className="max-w-5xl mx-auto px-8 w-full">
-        <motion.h2
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
-          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
-        >
-          DANS SON ÉCRIN
-        </motion.h2>
-        
-        {projet.imagePres3 && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="relative aspect-square overflow-hidden rounded-lg mb-8 max-w-2xl mx-auto"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+      >
+        <div className="max-w-6xl mx-auto px-8 w-full">
+          <motion.h2
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-4xl font-light tracking-[0.3em] mb-12 text-center"
+            style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
           >
-            <Image
-              src={projet.imagePres3}
-              alt="Bijou dans son écrin"
-              fill
-              className="object-cover"
-            />
-          </motion.div>
-        )}
-        
-        <motion.p
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="text-xl text-center font-light leading-relaxed italic"
-          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
-        >
-          {texts.slide3}
-        </motion.p>
-      </div>
-    </motion.div>
+            DANS SON ÉCRIN
+          </motion.h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {projet.imagePres3 && (
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg cursor-pointer hover:ring-2 hover:ring-[#acae9f] transition-all"
+                onClick={() => setShowPopup(true)}
+              >
+                <Image
+                  src={projet.imagePres3}
+                  alt="Bijou dans son écrin"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+            
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+              className="space-y-6"
+            >
+              <p className="text-xl font-light leading-relaxed italic"
+                style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+              >
+                {texts.slide3}
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+      
+      {projet.imagePres3 && (
+        <ImagePopup
+          isOpen={showPopup}
+          onClose={() => setShowPopup(false)}
+          imageSrc={projet.imagePres3}
+          title="Dans son Écrin"
+        />
+      )}
+    </>
   );
 }
 
-// Section 6 - Œuvre d'Art (Bijou sur support)
+// Section 6 - Œuvre d'Art (Bijou sur support) - Image à droite
 function OeuvreSection({ projet }: { projet: Projet }) {
   const texts = getTextsForJewelryType(projet.typeBijou);
+  const [showPopup, setShowPopup] = useState(false);
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
-    >
-      <div className="max-w-5xl mx-auto px-8 w-full">
-        <motion.h2
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
-          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
-        >
-          ŒUVRE D'ART
-        </motion.h2>
-        
-        {projet.imagePres4 && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="relative aspect-[4/3] overflow-hidden rounded-lg mb-8 max-w-3xl mx-auto"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+      >
+        <div className="max-w-6xl mx-auto px-8 w-full">
+          <motion.h2
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-4xl font-light tracking-[0.3em] mb-12 text-center"
+            style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
           >
-            <Image
-              src={projet.imagePres4}
-              alt="Œuvre d'art"
-              fill
-              className="object-cover"
-            />
-          </motion.div>
-        )}
-        
-        <motion.p
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="text-xl text-center font-light leading-relaxed italic"
-          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
-        >
-          {texts.slide4}
-        </motion.p>
-      </div>
-    </motion.div>
+            ŒUVRE D'ART
+          </motion.h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+              className="space-y-6 order-2 md:order-1"
+            >
+              <p className="text-xl font-light leading-relaxed italic"
+                style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+              >
+                {texts.slide4}
+              </p>
+            </motion.div>
+            
+            {projet.imagePres4 && (
+              <motion.div
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg cursor-pointer hover:ring-2 hover:ring-[#acae9f] transition-all order-1 md:order-2"
+                onClick={() => setShowPopup(true)}
+              >
+                <Image
+                  src={projet.imagePres4}
+                  alt="Œuvre d'art"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+      
+      {projet.imagePres4 && (
+        <ImagePopup
+          isOpen={showPopup}
+          onClose={() => setShowPopup(false)}
+          imageSrc={projet.imagePres4}
+          title="Œuvre d'Art"
+        />
+      )}
+    </>
   );
 }
 
