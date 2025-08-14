@@ -5,6 +5,7 @@ import { Projet } from '@/types';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoPermale from '@/public/soloo fin blc.png';
+import { getTextsForJewelryType } from '@/lib/presentation-texts';
 
 interface PresentationPageProps {
   projet: Projet;
@@ -19,7 +20,10 @@ export default function PresentationPage({ projet }: PresentationPageProps) {
     'intro',
     'univers',
     'demande',
-    'propositions',
+    'essence',
+    'porte',
+    'ecrin',
+    'oeuvre',
     'tarif',
     'engagements',
     'contact'
@@ -79,10 +83,13 @@ export default function PresentationPage({ projet }: PresentationPageProps) {
         {currentSection === 0 && <IntroSection projet={projet} key="intro" />}
         {currentSection === 1 && <UniversSection key="univers" />}
         {currentSection === 2 && <DemandeSection projet={projet} key="demande" />}
-        {currentSection === 3 && <PropositionsSection projet={projet} key="propositions" />}
-        {currentSection === 4 && <TarifSection projet={projet} key="tarif" />}
-        {currentSection === 5 && <EngagementsSection key="engagements" />}
-        {currentSection === 6 && <ContactSection projet={projet} key="contact" />}
+        {currentSection === 3 && <EssenceSection projet={projet} key="essence" />}
+        {currentSection === 4 && <PorteSection projet={projet} key="porte" />}
+        {currentSection === 5 && <EcrinSection projet={projet} key="ecrin" />}
+        {currentSection === 6 && <OeuvreSection projet={projet} key="oeuvre" />}
+        {currentSection === 7 && <TarifSection projet={projet} key="tarif" />}
+        {currentSection === 8 && <EngagementsSection key="engagements" />}
+        {currentSection === 9 && <ContactSection projet={projet} key="contact" />}
       </AnimatePresence>
 
       {/* Navigation */}
@@ -237,7 +244,7 @@ function UniversSection() {
   );
 }
 
-// Section 2 - Demande du client
+// Section 2 - Demande du client avec image sélectionnée
 function DemandeSection({ projet }: { projet: Projet }) {
   return (
     <motion.div
@@ -247,7 +254,7 @@ function DemandeSection({ projet }: { projet: Projet }) {
       transition={{ duration: 1 }}
       className="relative w-full h-full flex items-center justify-center text-[#efefef]"
     >
-      <div className="max-w-5xl mx-auto px-8">
+      <div className="max-w-6xl mx-auto px-8">
         <motion.h2
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -258,7 +265,7 @@ function DemandeSection({ projet }: { projet: Projet }) {
           VOTRE VISION
         </motion.h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -279,42 +286,48 @@ function DemandeSection({ projet }: { projet: Projet }) {
               <h3 className="text-[#acae9f] text-sm tracking-[0.2em] mb-2 uppercase">Destinataire</h3>
               <p className="text-2xl font-light">{projet.pourQui}</p>
             </div>
+            
+            <div className="bg-[#efefef]/5 backdrop-blur-sm p-6 rounded-lg mt-6">
+              <h3 className="text-[#acae9f] text-sm tracking-[0.2em] mb-4 uppercase">Votre inspiration</h3>
+              <p className="text-lg leading-relaxed italic">
+                "{projet.description}"
+              </p>
+              
+              {projet.gravure && (
+                <div className="mt-6 pt-6 border-t border-white/20">
+                  <h3 className="text-[#acae9f] text-sm tracking-[0.2em] mb-2 uppercase">Gravure souhaitée</h3>
+                  <p className="text-xl font-light">"{projet.gravure}"</p>
+                </div>
+              )}
+            </div>
           </motion.div>
           
-          <motion.div
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 1.2, duration: 1 }}
-            className="bg-[#efefef]/5 backdrop-blur-sm p-8 rounded-lg"
-          >
-            <h3 className="text-[#acae9f] text-sm tracking-[0.2em] mb-4 uppercase">Votre inspiration</h3>
-            <p className="text-lg leading-relaxed italic">
-              "{projet.description}"
-            </p>
-            
-            {projet.gravure && (
-              <div className="mt-8 pt-8 border-t border-white/20">
-                <h3 className="text-[#acae9f] text-sm tracking-[0.2em] mb-2 uppercase">Gravure souhaitée</h3>
-                <p className="text-xl font-light">"{projet.gravure}"</p>
-              </div>
-            )}
-          </motion.div>
+          {projet.imageSelectionnee && (
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+              className="relative aspect-square overflow-hidden rounded-lg"
+            >
+              <Image
+                src={projet.imageSelectionnee}
+                alt="Vision du bijou"
+                fill
+                className="object-cover"
+              />
+            </motion.div>
+          )}
         </div>
       </div>
     </motion.div>
   );
 }
 
-// Section 3 - Propositions créatives
-function PropositionsSection({ projet }: { projet: Projet }) {
-  const images = [
-    projet.imageIA1,
-    projet.imageIA2,
-    projet.imageIA3,
-    projet.imageIA4,
-    projet.imageIA5
-  ].filter((img): img is string => Boolean(img));
 
+// Section 3 - L'Essence du Bijou (Photo couchée)
+function EssenceSection({ projet }: { projet: Projet }) {
+  const texts = getTextsForJewelryType(projet.typeBijou);
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -323,7 +336,7 @@ function PropositionsSection({ projet }: { projet: Projet }) {
       transition={{ duration: 1 }}
       className="relative w-full h-full flex items-center justify-center text-[#efefef]"
     >
-      <div className="max-w-6xl mx-auto px-8 w-full">
+      <div className="max-w-5xl mx-auto px-8 w-full">
         <motion.h2
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -331,53 +344,199 @@ function PropositionsSection({ projet }: { projet: Projet }) {
           className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
           style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
         >
-          NOS CRÉATIONS EXCLUSIVES
+          L'ESSENCE DU BIJOU
         </motion.h2>
         
-        {images.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {images.map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1 + index * 0.2, duration: 0.8 }}
-                className={`relative aspect-square bg-[#efefef]/10 backdrop-blur-sm rounded-lg overflow-hidden ${
-                  image === projet.imageSelectionnee ? 'ring-4 ring-[#acae9f]' : ''
-                }`}
-              >
-                <Image
-                  src={image}
-                  alt={`Proposition ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-                {image === projet.imageSelectionnee && (
-                  <div className="absolute top-4 right-4 bg-[#acae9f] text-[#0a0a0a] px-3 py-1 rounded-full text-sm font-medium">
-                    Sélection
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        ) : (
+        {projet.imagePres1 && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="text-center py-20"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="relative aspect-[16/9] overflow-hidden rounded-lg mb-8"
           >
-            <p className="text-2xl text-[#efefef]/60">
-              Les créations visuelles seront bientôt disponibles
-            </p>
+            <Image
+              src={projet.imagePres1}
+              alt="Essence du bijou"
+              fill
+              className="object-cover"
+            />
           </motion.div>
         )}
+        
+        <motion.p
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 1 }}
+          className="text-xl text-center font-light leading-relaxed italic"
+          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+        >
+          {texts.slide1}
+        </motion.p>
       </div>
     </motion.div>
   );
 }
 
-// Section 4 - Proposition tarifaire
+// Section 4 - Porté avec Élégance (Bijou porté)
+function PorteSection({ projet }: { projet: Projet }) {
+  const texts = getTextsForJewelryType(projet.typeBijou);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1 }}
+      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+    >
+      <div className="max-w-5xl mx-auto px-8 w-full">
+        <motion.h2
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
+          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
+        >
+          PORTÉ AVEC ÉLÉGANCE
+        </motion.h2>
+        
+        {projet.imagePres2 && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="relative aspect-[4/3] overflow-hidden rounded-lg mb-8 max-w-3xl mx-auto"
+          >
+            <Image
+              src={projet.imagePres2}
+              alt="Bijou porté"
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
+        
+        <motion.p
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 1 }}
+          className="text-xl text-center font-light leading-relaxed italic"
+          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+        >
+          {texts.slide2}
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+// Section 5 - Dans son Écrin
+function EcrinSection({ projet }: { projet: Projet }) {
+  const texts = getTextsForJewelryType(projet.typeBijou);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1 }}
+      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+    >
+      <div className="max-w-5xl mx-auto px-8 w-full">
+        <motion.h2
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
+          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
+        >
+          DANS SON ÉCRIN
+        </motion.h2>
+        
+        {projet.imagePres3 && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="relative aspect-square overflow-hidden rounded-lg mb-8 max-w-2xl mx-auto"
+          >
+            <Image
+              src={projet.imagePres3}
+              alt="Bijou dans son écrin"
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
+        
+        <motion.p
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 1 }}
+          className="text-xl text-center font-light leading-relaxed italic"
+          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+        >
+          {texts.slide3}
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+// Section 6 - Œuvre d'Art (Bijou sur support)
+function OeuvreSection({ projet }: { projet: Projet }) {
+  const texts = getTextsForJewelryType(projet.typeBijou);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1 }}
+      className="relative w-full h-full flex items-center justify-center text-[#efefef]"
+    >
+      <div className="max-w-5xl mx-auto px-8 w-full">
+        <motion.h2
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+          className="text-5xl font-light tracking-[0.3em] mb-12 text-center"
+          style={{ fontFamily: 'Glacial Indifference, Helvetica Neue, Arial, sans-serif' }}
+        >
+          ŒUVRE D'ART
+        </motion.h2>
+        
+        {projet.imagePres4 && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="relative aspect-[4/3] overflow-hidden rounded-lg mb-8 max-w-3xl mx-auto"
+          >
+            <Image
+              src={projet.imagePres4}
+              alt="Œuvre d'art"
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
+        
+        <motion.p
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 1 }}
+          className="text-xl text-center font-light leading-relaxed italic"
+          style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
+        >
+          {texts.slide4}
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+// Section 7 - Proposition tarifaire
 function TarifSection({ projet }: { projet: Projet }) {
   return (
     <motion.div
@@ -439,7 +598,7 @@ function TarifSection({ projet }: { projet: Projet }) {
   );
 }
 
-// Section 5 - Engagements et garanties
+// Section 8 - Engagements et garanties
 function EngagementsSection() {
   return (
     <motion.div
@@ -507,7 +666,7 @@ function EngagementsSection() {
   );
 }
 
-// Section 6 - Confirmation et contact
+// Section 9 - Confirmation et contact
 function ContactSection({ projet }: { projet: Projet }) {
   return (
     <motion.div
