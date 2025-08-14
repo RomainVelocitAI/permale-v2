@@ -240,15 +240,15 @@ function UniversSection() {
           style={{ fontFamily: 'Roboto Condensed, sans-serif' }}
         >
           <p>
-            Depuis 25 ans, PERMALE incarne l'excellence de la haute joaillerie française.
+            Depuis 1875, PERMALE incarne l'excellence de la haute joaillerie.
           </p>
           <p>
             Chaque création est une œuvre unique, façonnée par les mains expertes 
-            de nos maîtres artisans dans notre atelier parisien.
+            de nos maîtres artisans dans nos ateliers de La Réunion.
           </p>
           <p className="text-2xl text-[#acae9f] italic">
-            « Un bijou PERMALE n'est pas seulement un ornement, 
-            c'est une histoire gravée dans le temps »
+            « Associer à chaque moment de vie unique 
+            une création unique »
           </p>
         </motion.div>
       </div>
@@ -736,10 +736,10 @@ function EngagementsSection() {
           >
             <h3 className="text-2xl font-light tracking-[0.2em] mb-6 text-[#acae9f]">QUALITÉ</h3>
             <ul className="space-y-3 text-lg">
-              <li>• Garantie à vie sur la fabrication</li>
-              <li>• Certificats GIA pour tous nos diamants</li>
-              <li>• Or 18 carats poinçonné</li>
-              <li>• Contrôle qualité à chaque étape</li>
+              <li>• Tradition artisanale depuis 1875</li>
+              <li>• Pierres précieuses certifiées</li>
+              <li>• Or et métaux précieux de qualité supérieure</li>
+              <li>• Création sur mesure authentique</li>
             </ul>
           </motion.div>
           
@@ -751,10 +751,10 @@ function EngagementsSection() {
           >
             <h3 className="text-2xl font-light tracking-[0.2em] mb-6 text-[#acae9f]">SERVICE</h3>
             <ul className="space-y-3 text-lg">
-              <li>• Suivi personnalisé de votre projet</li>
-              <li>• Modifications possibles jusqu'à validation</li>
-              <li>• Livraison sécurisée offerte</li>
-              <li>• Service après-vente premium</li>
+              <li>• Conseils personnalisés en boutique</li>
+              <li>• Entretien et réparation de vos bijoux</li>
+              <li>• Savoir-faire artisanal réunionnais</li>
+              <li>• Héritage familial de 150 ans</li>
             </ul>
           </motion.div>
         </div>
@@ -818,12 +818,9 @@ function ContactSection({ projet }: { projet: Projet }) {
           
           <div className="pt-8">
             <p className="text-sm text-[#efefef]/60 mb-4">Pour toute question immédiate</p>
-            <a 
-              href="tel:+33123456789" 
-              className="text-2xl text-[#acae9f] hover:text-[#efefef] transition-colors"
-            >
-              +33 1 23 45 67 89
-            </a>
+            <p className="text-lg text-[#acae9f]">
+              contact@permale.com
+            </p>
           </div>
         </motion.div>
         
@@ -840,6 +837,15 @@ function ContactSection({ projet }: { projet: Projet }) {
             height={50} 
             className="mx-auto opacity-50"
           />
+          <p className="text-xs text-[#efefef]/40 mt-6">
+            PERMALE - Haute Joaillerie depuis 1875
+          </p>
+          <p className="text-xs text-[#efefef]/40 mt-2">
+            Entreprise familiale basée à La Réunion
+          </p>
+          <p className="text-xs text-[#efefef]/40 mt-2">
+            Saint-Pierre • Saint-Denis • Saint-Gilles • Le Tampon
+          </p>
         </motion.div>
       </div>
     </motion.div>

@@ -46,8 +46,8 @@ export default function ProjetsPage() {
                 La Maison
               </h3>
               <p className="text-[#efefef]/60 text-sm leading-relaxed">
-                Depuis 25 ans, PERMALE incarne l'excellence
-                de la haute joaillerie française.
+                Depuis 1875, PERMALE incarne l'excellence
+                de la haute joaillerie à La Réunion.
               </p>
             </div>
             
@@ -60,9 +60,8 @@ export default function ProjetsPage() {
                 Contact
               </h3>
               <p className="text-[#efefef]/60 text-sm">
-                16 Place Vendôme<br />
-                75001 Paris, France<br />
-                +33 1 23 45 67 89
+                La Réunion<br />
+                contact@permale.com
               </p>
             </div>
             
@@ -90,7 +89,7 @@ export default function ProjetsPage() {
           
           <div className="mt-12 pt-8 border-t border-[#efefef]/10 text-center">
             <p className="text-[#efefef]/40 text-xs tracking-wider" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
-              © 2024 PERMALE - HAUTE JOAILLERIE FRANÇAISE
+              © 2024 PERMALE - HAUTE JOAILLERIE DEPUIS 1875 • LA RÉUNION
             </p>
           </div>
         </div>

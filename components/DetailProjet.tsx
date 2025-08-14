@@ -438,7 +438,10 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
         {/* Footer */}
         <div className="mt-24 text-center pb-8">
           <p className="text-xs text-[#acae9f] tracking-[0.2em] uppercase" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
-            Permale - Haute Joaillerie
+            Permale - Haute Joaillerie depuis 1875
+          </p>
+          <p className="text-xs text-[#acae9f]/60 tracking-[0.15em] mt-2" style={{ fontFamily: 'Roboto Condensed, sans-serif' }}>
+            Entreprise familiale • La Réunion
           </p>
         </div>
       </div>

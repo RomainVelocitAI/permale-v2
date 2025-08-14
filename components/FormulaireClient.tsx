@@ -640,7 +640,7 @@ export default function FormulaireClient() {
             <div className="inline-block">
               <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#acae9f]/30 to-transparent mb-4" />
               <p className="text-xs text-[#363d43]/40 tracking-[0.3em] uppercase font-light" style={{ fontFamily: 'Roboto Condensed' }}>
-                Permale • Haute Joaillerie Française
+                Permale • Haute Joaillerie • La Réunion
               </p>
             </div>
           </div>
