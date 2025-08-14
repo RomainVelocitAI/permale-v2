@@ -143,11 +143,11 @@ Le prompt doit décrire le bijou de manière détaillée et professionnelle pour
       
       // Appel webhook n8n
       console.log('[POST /api/projets] Envoi webhook n8n avec projetId:', nouveauProjet.id);
-      console.log('[POST /api/projets] Webhook URL:', 'https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
+      console.log('[POST /api/projets] Webhook URL:', 'https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
       console.log('[POST /api/projets] Webhook data:', JSON.stringify(webhookData, null, 2));
       
       try {
-        const webhookResponse = await fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
+        const webhookResponse = await fetch('https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

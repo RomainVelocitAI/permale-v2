@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
     };
     
     console.log('[test-webhook] Données de test:', JSON.stringify(testData, null, 2));
-    console.log('[test-webhook] URL:', 'https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
+    console.log('[test-webhook] URL:', 'https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
     
-    // Appel webhook
-    const response = await fetch('https://n8n.srv765302.hstgr.cloud/webhook-test/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
+    // Appel webhook (production)
+    const response = await fetch('https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
