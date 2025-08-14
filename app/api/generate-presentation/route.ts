@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('[Generate Presentation] Début génération pour projet:', projetId);
+    console.log('[Generate Presentation] Début génération des 4 images pour projet:', projetId);
     console.log('[Generate Presentation] Type de bijou:', typeBijou);
     console.log('[Generate Presentation] Image sélectionnée:', imageSelectionnee);
 
