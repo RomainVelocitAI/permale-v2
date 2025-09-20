@@ -39,8 +39,8 @@ node create-fields-metadata.js  # Generate field metadata for Airtable
 
 ### Critical Airtable Configuration
 ```
-Base Name: "Joaillerie Siva" (NOT "Permale")
-Base ID: appXBgsSjbSGjAGqA
+Base Name: "Joaillerie Permale"
+Base ID: appX1G5XuBKe4po97
 Table Name: "Projets"
 Table ID: tbld55N3Bmz9hKBqe
 ```
@@ -50,7 +50,7 @@ Required in `.env.local`:
 ```bash
 # Airtable (Required)
 AIRTABLE_API_KEY=
-AIRTABLE_BASE_ID=appXBgsSjbSGjAGqA
+AIRTABLE_BASE_ID=appX1G5XuBKe4po97
 AIRTABLE_TABLE_NAME=Projets
 
 # Upload Provider (Required)
@@ -78,7 +78,7 @@ ADMIN_PASSWORD=
 
 ### Airtable Field Mappings
 The application maps TypeScript fields to Airtable columns with specific transformations:
-- TypeBijou categories are simplified in Airtable (e.g., all ring types → "Bague")
+- TypeBijou uses the new field "Type de bijou (nouveau)" with 10 exact options
 - Images field expects array of `{url, filename}` objects
 - Budget is stored as number in Airtable
 - photosModele URLs are extracted from Airtable attachments
@@ -192,3 +192,9 @@ This project currently has no test framework configured. Tests are limited to:
 - `/lib/upload-service.ts`: Image upload abstraction layer
 - `/app/api/projets/route.ts`: Main API endpoint for CRUD operations
 - `/types/index.ts`: TypeScript interfaces defining the data model
+
+### Database Information
+- **Base**: "Joaillerie Permale" (nouvelle base dupliquée)
+- **Base ID**: appX1G5XuBKe4po97
+- **Table**: "Projets"
+- **Structure**: Identique à l'ancienne base "Joaillerie Siva"
