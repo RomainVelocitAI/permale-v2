@@ -41,18 +41,26 @@ export async function POST(request: NextRequest) {
     // Gérer l'upload des images si présentes
     let uploadedPhotosUrls: string[] = [];
     if (body.photosModele && body.photosModele.length > 0) {
+      console.log('[POST /api/projets] Photos modèle reçues:', body.photosModele.length);
       const uploadService = createUploadService();
-      
+
       // Extraire les données et noms de fichiers
       const imagesData = body.photosModele.map((photo: { data: string; filename: string }) => photo.data);
       const filenames = body.photosModele.map((photo: { data: string; filename: string }) => photo.filename);
-      
+      console.log('[POST /api/projets] Filenames:', filenames);
+
       try {
         // Upload les images et récupérer les URLs
+        console.log('[POST /api/projets] Début upload des photos modèle...');
         uploadedPhotosUrls = await uploadService.uploadImages(imagesData, filenames);
+        console.log('[POST /api/projets] Photos modèle uploadées avec succès:', uploadedPhotosUrls);
       } catch (uploadError) {
-        // En cas d'erreur d'upload, on continue sans les images
+        // En cas d'erreur d'upload, on log l'erreur mais on continue
+        console.error('[POST /api/projets] Erreur upload photos modèle:', uploadError);
+        console.error('[POST /api/projets] Stack trace:', uploadError instanceof Error ? uploadError.stack : '');
       }
+    } else {
+      console.log('[POST /api/projets] Aucune photo modèle reçue');
     }
 
     // Gérer l'upload des images générées par IA
@@ -73,6 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Créer le projet dans Airtable
+    console.log('[POST /api/projets] Création du projet Airtable avec photos:', uploadedPhotosUrls);
     const nouveauProjet = await createProjet({
       nom: body.nom || '',
       prenom: body.prenom || '',
@@ -144,7 +153,8 @@ Le prompt doit décrire le bijou de manière détaillée et professionnelle pour
       // Appel webhook n8n
       console.log('[POST /api/projets] Envoi webhook n8n avec projetId:', nouveauProjet.id);
       console.log('[POST /api/projets] Webhook URL:', 'https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd');
-      console.log('[POST /api/projets] Webhook data:', JSON.stringify(webhookData, null, 2));
+      console.log('[POST /api/projets] Photos dans webhook:', webhookData.photosModele);
+      console.log('[POST /api/projets] Webhook data complète:', JSON.stringify(webhookData, null, 2));
       
       try {
         const webhookResponse = await fetch('https://n8n.srv765302.hstgr.cloud/webhook/009df7aa-4fa9-4e60-b0e1-b7bf2bc3d3bd', {
