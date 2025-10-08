@@ -693,7 +693,7 @@ function TarifSection({ projet }: { projet: Projet }) {
             </div>
             <div className="flex items-start gap-3">
               <span className="text-[#acae9f] mt-1">✓</span>
-              <span>Finitions à la main dans notre atelier parisien</span>
+              <span>Finitions à la main dans notre atelier réunionnais</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-[#acae9f] mt-1">✓</span>

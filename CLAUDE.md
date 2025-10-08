@@ -162,7 +162,7 @@ Projects get automatic presentation URLs:
 ### Vercel Configuration
 The project includes `vercel.json` with:
 - Next.js framework configuration
-- CDG1 (Paris) region deployment
+- La Réunion region deployment
 - Security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
 - Static asset caching optimization
 
