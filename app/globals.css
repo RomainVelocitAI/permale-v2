@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  /* PERMALE Brand Colors */
+  --permale-anthracite: #363d43;
+  --permale-white: #efefef;
+  --permale-gold: #acae9f;
+  --permale-black: #000000;
+  
+  /* Application Colors */
+  --background: var(--permale-anthracite);
+  --foreground: var(--permale-white);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Roboto Condensed', Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--permale-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--permale-gold);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--permale-white);
+}
+
+/* Selection */
+::selection {
+  background: var(--permale-gold);
+  color: var(--permale-black);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove default focus styles and add custom */
+*:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--permale-gold);
+}
