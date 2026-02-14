@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllProjets } from '@/lib/airtable';
+import { getProjetByPresentationUrl } from '@/lib/airtable';
 import { extractIdFromPresentationUrl } from '@/lib/utils';
+
+// Cache en mémoire pour éviter les appels Airtable répétés
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // GET - Récupérer un projet par son URL de présentation
 export async function GET(request: NextRequest) {
@@ -25,9 +29,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupérer tous les projets et trouver celui avec l'URL correspondante
-    const projets = await getAllProjets();
-    const projet = projets.find(p => p.urlPresentation && p.urlPresentation.includes(uniqueId));
+    // Vérifier le cache
+    const cached = cache.get(uniqueId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return NextResponse.json(cached.data);
+    }
+
+    // Récupérer uniquement le projet correspondant (1 seul appel API)
+    const projet = await getProjetByPresentationUrl(uniqueId);
     
     if (!projet) {
       return NextResponse.json(
@@ -35,6 +44,9 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Mettre en cache
+    cache.set(uniqueId, { data: projet, timestamp: Date.now() });
 
     return NextResponse.json(projet);
   } catch (error) {

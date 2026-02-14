@@ -150,6 +150,53 @@ export async function createProjet(projet: Omit<Projet, 'id' | 'dateCreation'>):
   }
 }
 
+export async function getProjetByPresentationUrl(uniqueId: string): Promise<Projet | null> {
+  try {
+    const table = initializeAirtable();
+    const records = await table.select({
+      filterByFormula: `FIND("${uniqueId}", {URL Presentation})`,
+      maxRecords: 1,
+    }).all();
+
+    if (records.length === 0) return null;
+
+    const record = records[0];
+    const photosUrls = extractPhotosUrls(record.get('Images'));
+
+    return {
+      id: record.id,
+      nom: record.get('Nom') as string || '',
+      prenom: record.get('Prenom') as string || '',
+      email: record.get('Email') as string || '',
+      telephone: record.get('Telephone') as string || '',
+      typeBijou: (record.get('Type de bijou (nouveau)') as TypeBijou) || 'Alliance',
+      description: record.get('Description') as string || '',
+      aUnModele: record.get('A un modèle') as boolean || photosUrls.length > 0,
+      photosModele: photosUrls,
+      occasion: record.get('Occasion') as string || '',
+      pourQui: record.get('Pour qui') as string || '',
+      budget: record.get('Budget') ? record.get('Budget').toString() : '',
+      dateLivraison: record.get('Date de livraison') as string || '',
+      gravure: record.get('Gravure') as string || '',
+      images: [],
+      imageSelectionnee: extractPhotosUrls(record.get('Image choisie'))[0] || '',
+      imageIA1: record.get('imageIA1') as string || '',
+      imageIA2: record.get('imageIA2') as string || '',
+      imageIA3: record.get('imageIA3') as string || '',
+      imageIA4: record.get('imageIA4') as string || '',
+      imageIA5: record.get('imageIA5') as string || '',
+      imagePres1: extractPhotosUrls(record.get('ImagePres1'))[0] || '',
+      imagePres2: extractPhotosUrls(record.get('ImagePres2'))[0] || '',
+      imagePres3: extractPhotosUrls(record.get('ImagePres3'))[0] || '',
+      imagePres4: extractPhotosUrls(record.get('ImagePres4'))[0] || '',
+      urlPresentation: record.get('URL Presentation') as string || '',
+      dateCreation: record.get('Date de creation') as string || new Date().toISOString(),
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function getAllProjets(): Promise<Projet[]> {
   try {
     const table = initializeAirtable();
