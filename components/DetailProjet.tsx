@@ -36,9 +36,14 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
       : imagesIA;
 
   // Vérifier périodiquement si les images ont été générées
+  // Max 20 tentatives (= ~10 minutes), intervalle de 30 secondes
+  const [pollCount, setPollCount] = useState(0);
+  const MAX_POLL_ATTEMPTS = 20;
+  const POLL_INTERVAL = 30000; // 30 secondes
+
   useEffect(() => {
-    // Si on a déjà des images ou pas d'ID, pas besoin de vérifier
-    if (generatedImages.length > 0 || !projet.id) return;
+    // Si on a déjà des images, pas d'ID, ou max atteint, on arrête
+    if (generatedImages.length > 0 || !projet.id || pollCount >= MAX_POLL_ATTEMPTS) return;
 
     const checkForImages = async () => {
       if (checkingImages || !projet.id) return;
@@ -57,21 +62,24 @@ export default function DetailProjet({ projet, onClose }: DetailProjetProps) {
           
           if (newImagesIA.length > 0 || newImages.length > 0) {
             setLocalGeneratedImages(newImages.length > 0 ? newImages.slice(0, 4) : newImagesIA);
+          } else {
+            setPollCount(prev => prev + 1);
           }
         }
       } catch (error) {
         console.error('Erreur lors de la vérification des images:', error);
+        setPollCount(prev => prev + 1);
       } finally {
         setCheckingImages(false);
       }
     };
 
-    // Vérifier immédiatement puis toutes les 5 secondes
+    // Vérifier immédiatement puis toutes les 30 secondes
     checkForImages();
-    const interval = setInterval(checkForImages, 5000);
+    const interval = setInterval(checkForImages, POLL_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [projet.id, generatedImages.length, checkingImages]);
+  }, [projet.id, generatedImages.length, checkingImages, pollCount]);
 
   const handleSelectImage = (imageUrl: string) => {
     setImageTemporaire(imageUrl);
